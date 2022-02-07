@@ -17,6 +17,6 @@ class WebDriver:
     remove = False
 
 class WebOlx:
-    time_wait = 30
+    time_wait = 10
     link = 'https://www.olx.ua/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/kiev'
     

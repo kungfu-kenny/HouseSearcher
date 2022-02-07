@@ -1,4 +1,4 @@
-from pydoc import cli
+from pprint import pprint
 from selenium.webdriver.common.by import By
 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -111,91 +111,159 @@ class ParseOlx(ParseMain):
         Input:  previously developed link
         Output: we developed list with selected values
         """
-        self.get(self.link)
-        
-        click_district = self.find_element_by_css_selector('span.header.block')
-        click_district.click()
-        ul = self.find_element_by_css_selector('ul.small.suggestinput.bgfff.lheight20.br-3.abs.districts.binded')
-        for li in ul.find_elements(By.TAG_NAME,"li"):
-            if li.text.lower() == self.text_district.lower():
-                self.execute_script(
-                    "arguments[0].click();", 
-                    li.find_element(
-                        By.TAG_NAME,
-                        'a'
+        try:
+            self.get(self.link)
+            
+            # click_district = self.find_element_by_css_selector('span.header.block')
+            # click_district.click()
+            
+            WebDriverWait(self, WebOlx.time_wait).until(
+                EC.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'span.header.block'
                         )
                     )
-                break
-        
-        div_check = self.find_element_by_css_selector('li#param_number_of_rooms_string')
-        class_check = div_check.find_element(By.TAG_NAME, 'a')
-        class_check.click()
-        # span_check = class_check.find_element(By.CSS_SELECTOR, 'span.header.block')
-        span_check = WebDriverWait(class_check, WebOlx.time_wait).until(
-            EC.presence_of_element_located(
-                (
-                    By.CSS_SELECTOR, 
-                    'span.header.block'
-                    )
-                )
-            )
-        
-        span_check.click()
-        # ul = self.find_element_by_css_selector('ul.small.suggestinput.bgfff.lheight20.br-3.abs.select.binded')
-        ul = WebDriverWait(self, WebOlx.time_wait).until(
-            EC.presence_of_element_located(
-                (
-                    By.CSS_SELECTOR, 
-                    'ul.small.suggestinput.bgfff.lheight20.br-3.abs.select.binded'
-                    )
-                )
-            )
-        for li in ul.find_elements(By.TAG_NAME, "li"):
-            if li.text in self.list_rooms:
-                self.execute_script(
-                    "arguments[0].click();", 
-                    li.find_element(
-                        By.TAG_NAME,
-                        'input'
+                ).click()
+
+            ul = WebDriverWait(self, WebOlx.time_wait).until(
+                EC.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'ul.small.suggestinput.bgfff.lheight20.br-3.abs.districts.binded'
                         )
                     )
-    
-        click_button = self.find_element_by_css_selector('span.button.search.submit.active')
-        click_button.click()
-        # table_flat = table_flat.find_element(By.CSS_SELECTOR, 'table#offers_table.fixed.offers.breakword.redesigned')
-        # table_flat = self.find_element_by_css_selector("table#offers_table")
-        table_flat = WebDriverWait(self, WebOlx.time_wait).until(
-            EC.presence_of_element_located(
-                (
-                    By.CSS_SELECTOR, 
-                    "table#offers_table"
+                )
+            for li in ul.find_elements(By.TAG_NAME,"li"):
+                if li.text.lower() == self.text_district.lower():
+                    self.execute_script(
+                        "arguments[0].click();", 
+                        li.find_element(
+                            By.TAG_NAME,
+                            'a'
+                            )
+                        )
+                    break
+            
+            # div_check = WebDriverWait(self, WebOlx.time_wait).until(
+            #     EC.presence_of_element_located(
+            #         (
+            #             By.CSS_SELECTOR, 
+            #             'li#param_number_of_rooms_string'
+            #             )
+            #         )
+            #     )
+            
+            # class_check = WebDriverWait(div_check, WebOlx.time_wait).until(
+            #     EC.presence_of_element_located(
+            #         (
+            #             By.CSS_SELECTOR, 
+            #             'a.button.gray.block.fnormal.rel.zi3.clr'
+            #         )
+            #     )
+            # )
+            
+            WebDriverWait(self, WebOlx.time_wait).until(
+                EC.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'div.filter-item.rel.filter-item-number_of_rooms_string'
+                        )
+                    )
+                ).click()
+            
+            ul = WebDriverWait(self, WebOlx.time_wait).until(
+                EC.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'ul.small.suggestinput.bgfff.lheight20.br-3.abs.select.binded'
+                        )
                     )
                 )
-            )
-        print(table_flat)
-        print('5555555555555555555555555555555555555555555555555555555555555')
-        table_flats = table_flat.find_elements(By.CSS_SELECTOR, "tr.wrap")
-        # table_flats = WebDriverWait(
-        #     table_flat, WebOlx.time_wait).until(
-        #     EC.presence_of_element_located(
-        #         (
-        #             By.CSS_SELECTOR, 
-        #             "tr.wrap"
-        #             )
-        #         )
-        #     )
-        value_list = []
-        for table in table_flats[:1]:
-            print('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
-            value_name = table.find_element(By.TAG_NAME, 'h3').text
-            value_price = table.find_element(By.CSS_SELECTOR, 'td.wwnormal.tright.td-price').text
-            # value_date = table.find_elements(By.CSS_SELECTOR, "small.breadcrumb.x-normal")
-            print('666666666666666666666666666666666666666666666666666666666666666666666')
-            # value_link = table.find_element(By.CSS_SELECTOR, 'a.marginright5.link.linkWithHash.detailsLink').href
-            value_place = 1
-            print(table)
-            print(value_name, value_price)
-            print(',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,')
-        # print(table_flats)
-        # print(flats_values)
-        print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+            
+            for li in ul.find_elements(By.TAG_NAME, "li"):
+                if li.text in self.list_rooms:
+                    self.execute_script(
+                        "arguments[0].click();", 
+                        li.find_element(
+                            By.TAG_NAME,
+                            'input'
+                            )
+                        )
+            
+            WebDriverWait(self, WebOlx.time_wait).until(
+                EC.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        "input#search-submit"
+                        )
+                    )
+                ).click()
+            
+            # table_flat = WebDriverWait(self, WebOlx.time_wait).until(
+            #     EC.presence_of_element_located(
+            #         (
+            #             By.CSS_SELECTOR, 
+            #             "table#offers_table"
+            #         )
+            #     )
+            # )
+            value_list = []
+            
+            # self.implicitly_wait(1)
+            for table in self.find_elements_by_css_selector("tr.wrap")[:]:
+                value_name = WebDriverWait(
+                    table, WebOlx.time_wait).until(
+                        EC.presence_of_element_located(
+                            (
+                                By.CSS_SELECTOR, 
+                                'a.marginright5.link.linkWithHash.detailsLink'
+                                # 'div.space.rel'
+                                # 'strong'
+                            )
+                        )
+                    ).text
+                
+                value_price =  WebDriverWait(
+                    table, WebOlx.time_wait).until(
+                    EC.presence_of_element_located(
+                        (
+                            By.CSS_SELECTOR, 
+                            # 'td.wwnormal.tright.td-price'
+                            'p.price'
+                            )
+                        )
+                    ).text
+                
+                value_place_date = table.find_elements(By.CSS_SELECTOR, "p.lheight16")
+                print(len(value_place_date), value_place_date)
+                #, [f.text for f in value_place_date])
+                value_place_date = [f.text for f in value_place_date][-1]
+                print(value_place_date)
+                print('################################################')
+                value_date = ' '.join(value_place_date.split('Киев,')[-1].split(' ')[2:])
+                value_place = value_place_date.split(' ')[1] if value_place_date else value_place_date
+                
+                value_link = table.find_element(
+                    By.CSS_SELECTOR, 
+                    'a.marginright5.link.linkWithHash.detailsLink'
+                    ).get_attribute('href')
+                
+                value_list.append(
+                    {
+                        "Name": value_name,
+                        "Price": value_price,
+                        "Link": value_link,
+                        "Place": value_place,
+                        "Date": value_date,
+                    }
+                )
+                
+            pprint(value_list)
+            return value_list
+        except Exception as e:
+            import os, sys
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            return []
