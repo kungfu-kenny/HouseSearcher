@@ -16,6 +16,10 @@ class WebDriver:
     name_archive = 'selenium_name.zip'
     remove = False
 
+class WebFlatfy:
+    link_start = 'https://flatfy.ua'
+    link_continue = 'аренда-квартир-киев'
+
 class WebOlx:
     time_wait = 10
     link = 'https://www.olx.ua/nedvizhimost/kvartiry/dolgosrochnaya-arenda-kvartir/kiev'

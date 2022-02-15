@@ -12,8 +12,8 @@ class ParseOlx(ParseMain):
     """
     class which is dedicated to produce_values of the olx website
     """
-    def __init__(self, path_driver:str, text_insert:str='', text_district:str='', list_rooms:list=[]) -> None:
-        super(ParseOlx, self).__init__(path_driver)
+    def __init__(self, driver_path:str, text_insert:str='', text_district:str='', list_rooms:list=[]) -> None:
+        super(ParseOlx, self).__init__(driver_path)
         self.link = self.produce_link(text_insert)
         self.text_district = text_district
         self.list_rooms = self.produce_list_rooms(list_rooms)
