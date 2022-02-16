@@ -17,6 +17,7 @@ class WebDriver:
     remove = False
 
 class WebFlatfy:
+    time_wait = 5
     link_start = 'https://flatfy.ua'
     link_continue = 'аренда-квартир-киев'
 

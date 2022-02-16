@@ -29,13 +29,13 @@ class ParseFlatfly(ParseMain):
         """
         if not value_price:
             return 'любая'
-        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price < 15000:
+        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 15000:
             return 'до 15 000 грн'
-        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price < 20000:
+        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 20000:
             return 'до 20 000 грн'
-        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price < 40000:
+        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 40000:
             return 'до 40 000 грн'
-        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price < 60000:
+        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 60000:
             return 'до 60 000 грн'
         
     @staticmethod
@@ -96,7 +96,7 @@ class ParseFlatfly(ParseMain):
         Input:  None
         Output: we developed values of the rooms
         """
-        WebDriverWait(self, 5).until(
+        WebDriverWait(self, WebFlatfy.time_wait).until(
             EC.presence_of_element_located(
                 (
                     By.CSS_SELECTOR, 
@@ -134,7 +134,7 @@ class ParseFlatfly(ParseMain):
         Input:  given values of the price
         Output: None
         """
-        WebDriverWait(self, 5).until(
+        WebDriverWait(self, WebFlatfy.time_wait).until(
             EC.presence_of_element_located(
                 (
                     By.CSS_SELECTOR, 
@@ -160,10 +160,17 @@ class ParseFlatfly(ParseMain):
         if self.text:
             input_text = self.find_element_by_id('downshift-0-input')
             input_text.send_keys(self.text)
-            button_press = self.find_elements_by_css_selector(
-                'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button')[-1]
-            # button_press.find_element(By.TAG_NAME, 'canvas').click()
-            WebDriverWait(button_press, 5).until(
+            # button_press = self.find_elements_by_css_selector(
+            #     'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button')[-1]
+            button_press = WebDriverWait(self, WebFlatfy.time_wait).until(
+                EC.presence_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button'
+                        )
+                    )
+                )[-1]
+            WebDriverWait(button_press, WebFlatfy.time_wait).until(
                 EC.presence_of_element_located(
                     (
                         By.TAG_NAME, 
@@ -171,6 +178,7 @@ class ParseFlatfly(ParseMain):
                         )
                     )
                 ).click()
+            # button_press.find_element(By.TAG_NAME, 'canvas').click()
             # input_text.submit()
 
     def produce_searched_links(self) -> list:
@@ -179,6 +187,7 @@ class ParseFlatfly(ParseMain):
         Input: None
         Output: list of desired links
         """
+        self.wait_loading_elements('a.realty-preview-title__link')
         return  [
             f.get_attribute('href') for f in self.find_elements_by_css_selector(
                 'a.realty-preview-title__link'
@@ -191,6 +200,7 @@ class ParseFlatfly(ParseMain):
         Input:  None
         Output: list of the selected prices
         """
+        self.wait_loading_elements('div.realty-preview-price.realty-preview-price--main')
         return [
             f.text for f in self.find_elements_by_css_selector(
                 'div.realty-preview-price.realty-preview-price--main')]
@@ -201,6 +211,7 @@ class ParseFlatfly(ParseMain):
         Input:  None
         Output: list of the prices square
         """
+        self.wait_loading_elements('div.realty-preview-price.realty-preview-price--sqm')
         return [
             f.text for f in self.find_elements_by_css_selector(
                 'div.realty-preview-price.realty-preview-price--sqm')]
@@ -211,21 +222,22 @@ class ParseFlatfly(ParseMain):
         Input:  None
         Output: list with the links
         """
+        self.wait_loading_elements('h3.realty-preview-title')
         return [
             f.text for f in self.find_elements_by_css_selector('h3.realty-preview-title')]
 
-    def wait_loading_elements(self) -> None:
+    def wait_loading_elements(self, value_base:str='div.feed-layout__item-holder') -> None:
         """
         Method which is dedicated to wait elements to load
-        Input:  None
+        Input:  value_base = multiple selector to wait
         Output: None
         """
         # self.implicitly_wait(5)
-        WebDriverWait(self, 5).until(
-            EC.presence_of_element_located(
+        WebDriverWait(self, WebFlatfy.time_wait).until(
+            EC.presence_of_all_elements_located(
                 (
                     By.CSS_SELECTOR, 
-                    'div.content.search-content.search-content--in-one-column'
+                    value_base
                     )
                 )
             )
@@ -236,10 +248,11 @@ class ParseFlatfly(ParseMain):
         Input:  None
         Output: list of descriptions about the flats
         """
+        self.wait_loading_elements('p.realty-preview-description__text')
         return [
             f.text for f in self.find_elements_by_css_selector('p.realty-preview-description__text')]
         
-    def produce_basic_search(self):
+    def produce_search_results(self):
         """
         Method which is dedicated for the testing of the selected values
         Input:  None
@@ -252,13 +265,15 @@ class ParseFlatfly(ParseMain):
         self.produce_selected_text()
         
         self.wait_loading_elements()
-
+        print('The characteristics were set')
+        
         value_links = self.produce_searched_links()
         value_prices = self.produce_searched_prices()
         value_prices_sqr = self.produce_searched_prices_sqr()
         value_streets_basic = self.produce_searched_street_basic()
         value_descriptions = self.produce_searched_description()
         
+        self.wait_loading_elements('div.realty-preview-sub-title-wrapper')
         value_full_adresses, value_subdists, value_districts, value_cities = \
             self.make_adress_check(
                 [
@@ -267,6 +282,7 @@ class ParseFlatfly(ParseMain):
                     ]
                 )
         
+        self.wait_loading_elements('div.realty-preview-properties-item')
         value_rooms, value_squares, value_floors, value_types, value_repairs, value_years = \
             make_list_transpose(
                 make_list_sublists(
@@ -275,10 +291,13 @@ class ParseFlatfly(ParseMain):
                     ], 
                     6)
                 )
-        
+        value_ind = 1
         while self.get_value_bool():
-            self.implicitly_wait(5)
-            WebDriverWait(self, 5).until(
+            value_ind += 1
+            print(f'We found the other variations, check the {value_ind} page')
+            
+            # self.implicitly_wait(5)
+            WebDriverWait(self, WebFlatfy.time_wait).until(
                 EC.presence_of_element_located(
                     (
                         By.CSS_SELECTOR, 
@@ -296,6 +315,7 @@ class ParseFlatfly(ParseMain):
             value_streets_basic.extend(self.produce_searched_street_basic())
             value_descriptions.extend(self.produce_searched_description())
 
+            self.wait_loading_elements('div.realty-preview-sub-title-wrapper')
             value_full_adress, value_subdist, value_district, value_city = \
                 self.make_adress_check(
                     [
@@ -308,6 +328,7 @@ class ParseFlatfly(ParseMain):
             value_districts.extend(value_district)
             value_cities.extend(value_city)
 
+            self.wait_loading_elements('div.realty-preview-properties-item')
             value_room, value_square, value_floor, value_type, value_repair, value_year = \
                 make_list_transpose(
                     make_list_sublists(
@@ -323,4 +344,17 @@ class ParseFlatfly(ParseMain):
             value_repairs.extend(value_repair) 
             value_years.extend(value_year)
 
-        print(len(value_cities), len(value_years), len(value_links), len(value_prices))
+        # print('Links', len(value_links))
+        # print('Prices', len(value_prices))
+        # print('Prices Sqr', len(value_prices_sqr))
+        # print('Streets Base', len(value_streets_basic))
+        # print('Descriptions', len(value_descriptions))
+        # print('Full addr', len(value_full_adresses))
+        # print('Sub dists', len(value_subdists))
+        # print('Cities', len(value_cities))
+        # print('Rooms', len(value_rooms))
+        # print('Square', len(value_squares))
+        # print('Floors', len(value_floors))
+        # print('Types', len(value_types))
+        # print('Repairs', len(value_repairs))
+        # print('Years', len(value_years))

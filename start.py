@@ -8,8 +8,8 @@ try:
     parse_web = ParseWebDriver()
     path_webdriver = parse_web.check_webdriver_main()
     #TODO add here values of the list of the districts
-    # parse_olx = ParseOlx(path_webdriver, 'минская', 'Оболонский', [2, 3]).produce_search_results()
-    parse_flatfy = ParseFlatfly(path_webdriver, [2, 3], 30000, 'мінська').produce_basic_search()
+    parse_olx = ParseOlx(path_webdriver, 'минская', 'Оболонский', [2, 3]).produce_search_results()
+    # parse_flatfy = ParseFlatfly(path_webdriver, [2, 3], 15000, 'мінська').produce_search_results()
 except Exception as e:
     print(e)
     print('####################################################')

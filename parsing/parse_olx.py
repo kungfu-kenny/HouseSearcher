@@ -125,7 +125,7 @@ class ParseOlx(ParseMain):
                         )
                     )
                 ).click()
-
+            
             ul = WebDriverWait(self, WebOlx.time_wait).until(
                 EC.presence_of_element_located(
                     (
