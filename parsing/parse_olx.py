@@ -1,9 +1,9 @@
+import requests
 from pprint import pprint
 from selenium.webdriver.common.by import By
-
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-        
+from utilities.work_lists import make_list_sublists
 from parsing.parse_main import ParseMain
 from config import WebOlx
 
@@ -45,143 +45,72 @@ class ParseOlx(ParseMain):
             return f"{WebOlx.link}/q-{text_insert.lower()}/"
         return WebOlx.link
 
-    def get_link_values(self, link:str) -> None:
-        """
-        Method which is dedicated to check values of links
-        Input:  link = link where to get these values
-        Output: we created values of the html links
-        """
-        self.get(link)
-
-    def click_search(self) -> None:
-        """
-        Method which is dedicated to click the search of the given values
-        Input:  None
-        Output: we started searching the selected values
-        """
-        click_button = self.find_element_by_css_selector('span.button.search.submit.active')
-        print(click_button)
-        print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-        print(click_button.text)
-        click_button.click()
-        
     def produce_search_district(self) -> None:
         """
-        Method which is dedicated to click on the selected district which is going to be searched
+        Method which is dedicated to make the search by district
         Input:  None
-        Output: we developed the values of the getting district
+        Output: we developed the 
         """
-        f = self.find_element_by_css_selector('ul.small.suggestinput.bgfff.lheight20.br-3.abs.districts.binded')
-        for k in f.find_elements(By.TAG_NAME,"li"):
-            if k.text.lower() == self.text_district.lower():
+        WebDriverWait(self, WebOlx.time_wait).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR, 
+                    'span.header.block'
+                    )
+                )
+            ).click()
+
+        for li in WebDriverWait(self, WebOlx.time_wait).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR, 
+                    'ul.small.suggestinput.bgfff.lheight20.br-3.abs.districts.binded'
+                    )
+                )
+                ).find_elements(By.TAG_NAME,"li"):
+            if li.text.lower() == self.text_district.lower():
                 self.execute_script(
                     "arguments[0].click();", 
-                    k.find_element(
+                    li.find_element(
                         By.TAG_NAME,
                         'a'
                         )
                     )
                 break
-
+    
     def produce_search_rooms(self) -> None:
         """
-        Method which is dedicated to click on required rooms
+        Method which is dedicated to search the room values
         Input:  None
-        Output: we developed new rooms to the search
-        """
-        div_check = self.find_element_by_css_selector('li#param_number_of_rooms_string')
-        class_check = div_check.find_element(By.TAG_NAME, 'a')
-        class_check.click()
-        span_check = class_check.find_element(By.CSS_SELECTOR, 'span.header.block')
-        span_check.click()
-        ul = self.find_element_by_css_selector('ul.small.suggestinput.bgfff.lheight20.br-3.abs.select.binded')
-        for li in ul.find_elements(By.TAG_NAME, "li"):
-            if li.text in self.list_rooms:
-                self.execute_script(
-                    "arguments[0].click();", 
-                    li.find_element(
-                        By.TAG_NAME,
-                        'input'
-                        )
-                    )
-
-    def produce_search_results(self) -> set:
-        """
-        Method which is dedicated to get values
-        Input:  previously developed link
-        Output: we developed list with selected values
+        Output: developed the rooms for the search
         """
         try:
-            self.get(self.link)
-            
-            # click_district = self.find_element_by_css_selector('span.header.block')
-            # click_district.click()
-            
+            self.implicitly_wait(10)
+            print('Started checking the rooms')
             WebDriverWait(self, WebOlx.time_wait).until(
-                EC.presence_of_element_located(
+                EC.presence_of_all_elements_located(
                     (
                         By.CSS_SELECTOR, 
                         'span.header.block'
                         )
-                    )
-                ).click()
-            
-            ul = WebDriverWait(self, WebOlx.time_wait).until(
-                EC.presence_of_element_located(
+                    ) and
+                EC.element_located_to_be_selected(
                     (
                         By.CSS_SELECTOR, 
-                        'ul.small.suggestinput.bgfff.lheight20.br-3.abs.districts.binded'
+                        'div.filter-item.rel.filter-item-number_of_rooms_string'
                         )
-                    )
-                )
-            for li in ul.find_elements(By.TAG_NAME,"li"):
-                if li.text.lower() == self.text_district.lower():
-                    self.execute_script(
-                        "arguments[0].click();", 
-                        li.find_element(
-                            By.TAG_NAME,
-                            'a'
-                            )
-                        )
-                    break
-            
-            # div_check = WebDriverWait(self, WebOlx.time_wait).until(
-            #     EC.presence_of_element_located(
-            #         (
-            #             By.CSS_SELECTOR, 
-            #             'li#param_number_of_rooms_string'
-            #             )
-            #         )
-            #     )
-            
-            # class_check = WebDriverWait(div_check, WebOlx.time_wait).until(
-            #     EC.presence_of_element_located(
-            #         (
-            #             By.CSS_SELECTOR, 
-            #             'a.button.gray.block.fnormal.rel.zi3.clr'
-            #         )
-            #     )
-            # )
-            
-            WebDriverWait(self, WebOlx.time_wait).until(
-                EC.presence_of_element_located(
+                    ) and 
+                EC.element_to_be_clickable(
                     (
                         By.CSS_SELECTOR, 
                         'div.filter-item.rel.filter-item-number_of_rooms_string'
                         )
                     )
                 ).click()
-            
-            ul = WebDriverWait(self, WebOlx.time_wait).until(
-                EC.presence_of_element_located(
-                    (
-                        By.CSS_SELECTOR, 
-                        'ul.small.suggestinput.bgfff.lheight20.br-3.abs.select.binded'
-                        )
-                    )
-                )
-            
-            for li in ul.find_elements(By.TAG_NAME, "li"):
+            print('Clicked')
+            for li in self.find_element_by_css_selector(
+                    'ul.small.suggestinput.bgfff.lheight20.br-3.abs.select.binded'
+                    ).find_elements(By.TAG_NAME, "li"):
                 if li.text in self.list_rooms:
                     self.execute_script(
                         "arguments[0].click();", 
@@ -190,80 +119,191 @@ class ParseOlx(ParseMain):
                             'input'
                             )
                         )
-            
-            WebDriverWait(self, WebOlx.time_wait).until(
-                EC.presence_of_element_located(
+        except Exception:
+            print('We could not set up the room settings')
+    
+    def produce_search_result_click(self) -> None:
+        """
+        Method which is dedicated to produce the click of the searches
+        Input:  None
+        Output: we clicked on the search button
+        """
+        WebDriverWait(self, WebOlx.time_wait).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR, 
+                    "input#search-submit"
+                    )
+                )
+            ).click()
+        # self.implicitly_wait(10)
+        
+    def check_element_clickable(self) -> bool:
+        """
+        Method which is dedicated to check next link
+        Input:  None
+        Output: link which is required to check or the false value
+        """
+        try:
+            a = WebDriverWait(self, WebOlx.time_wait).until(
+                EC.element_to_be_clickable(
                     (
                         By.CSS_SELECTOR, 
-                        "input#search-submit"
+                        "span.fbold.next.abs.large"
+                    )
+                )
+            )
+            link = a.find_element(By.TAG_NAME, 'a').get_attribute('href')
+            if 199 < requests.get(link).status_code < 300:
+                return link
+            return False
+        except Exception:
+            return False
+
+    def produce_search_results(self) -> set:
+        """
+        Method which is dedicated to get values
+        Input:  previously developed link
+        Output: we developed list with selected values
+        """
+        self.get(self.link)
+
+        self.produce_search_district()
+        self.produce_search_rooms()
+        self.produce_search_result_click()
+
+        WebDriverWait(self, WebOlx.time_wait).until(
+            EC.visibility_of_all_elements_located(
+                (
+                    By.CSS_SELECTOR,
+                    'td.title-cell'
+                )
+            )
+        )
+        print('Done the adding values')
+        
+        prices = [f.text for f in WebDriverWait(self, WebOlx.time_wait
+            ).until(
+                EC.presence_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR,
+                        'p.price'
+                    )
+                )
+            )]
+        pprint(prices)
+        print('=============================================================')
+        names = [f.text for f in WebDriverWait(self, WebOlx.time_wait
+            ).until(
+                EC.presence_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR,
+                        'h3.lheight22.margintop5'
+                    )
+                )
+            )]
+        pprint(names)
+        print('=============================================================')
+        
+        places_all = make_list_sublists(
+                [f.text for f in WebDriverWait(self, WebOlx.time_wait
+                    ).until(
+                        EC.presence_of_all_elements_located(
+                            (
+                                By.CSS_SELECTOR,
+                                'small.breadcrumb.x-normal'
+                            )
                         )
                     )
-                ).click()
-            
-            # table_flat = WebDriverWait(self, WebOlx.time_wait).until(
-            #     EC.presence_of_element_located(
-            #         (
-            #             By.CSS_SELECTOR, 
-            #             "table#offers_table"
-            #         )
-            #     )
-            # )
-            value_list = []
-            
-            # self.implicitly_wait(1)
-            for table in self.find_elements_by_css_selector("tr.wrap")[:]:
-                value_name = WebDriverWait(
-                    table, WebOlx.time_wait).until(
-                        EC.presence_of_element_located(
-                            (
-                                By.CSS_SELECTOR, 
-                                'a.marginright5.link.linkWithHash.detailsLink'
-                                # 'div.space.rel'
-                                # 'strong'
-                            )
-                        )
-                    ).text
-                
-                value_price =  WebDriverWait(
-                    table, WebOlx.time_wait).until(
-                    EC.presence_of_element_located(
-                        (
-                            By.CSS_SELECTOR, 
-                            # 'td.wwnormal.tright.td-price'
-                            'p.price'
-                            )
-                        )
-                    ).text
-                
-                value_place_date = table.find_elements(By.CSS_SELECTOR, "p.lheight16")
-                print(len(value_place_date), value_place_date)
-                #, [f.text for f in value_place_date])
-                value_place_date = [f.text for f in value_place_date][-1]
-                print(value_place_date)
-                print('################################################')
-                value_date = ' '.join(value_place_date.split('Киев,')[-1].split(' ')[2:])
-                value_place = value_place_date.split(' ')[1] if value_place_date else value_place_date
-                
-                value_link = table.find_element(
-                    By.CSS_SELECTOR, 
-                    'a.marginright5.link.linkWithHash.detailsLink'
-                    ).get_attribute('href')
-                
-                value_list.append(
-                    {
-                        "Name": value_name,
-                        "Price": value_price,
-                        "Link": value_link,
-                        "Place": value_place,
-                        "Date": value_date,
-                    }
+                ], 3
+            )
+        places = [f[1] for f in places_all]
+        date = [f[2] for f in places_all]
+        
+        pprint(places)
+        print('=============================================================')
+        
+        pprint(date)
+        print('=============================================================')
+        
+        links = [
+            f.get_attribute('href')
+            for f in WebDriverWait(self, WebOlx.time_wait
+            ).until(
+                EC.presence_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR,
+                        'a.thumb.vtop.inlblk.rel.tdnone.linkWithHash.scale4.detailsLink'
+                    )
                 )
-                
-            pprint(value_list)
-            return value_list
-        except Exception as e:
-            import os, sys
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
-            return []
+            )
+        ]
+        pprint(links)
+        print('=============================================================')
+        
+        value_ind = 2
+        value_link = self.check_element_clickable()
+        while value_link:
+            self.get(value_link)
+            print(f'We found the other variations, check the {value_ind} page')
+            value_ind += 1
+            WebDriverWait(self, WebOlx.time_wait).until(
+                EC.visibility_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR,
+                        'td.title-cell'
+                    )
+                )
+            )
+            prices.extend(
+                [f.text for f in WebDriverWait(self, WebOlx.time_wait
+                    ).until(
+                        EC.presence_of_all_elements_located(
+                            (
+                                By.CSS_SELECTOR,
+                                'p.price'
+                            )
+                        )
+                    )
+                ]
+            )
+            names.extend(
+                [f.text for f in WebDriverWait(self, WebOlx.time_wait
+                    ).until(
+                        EC.presence_of_all_elements_located(
+                            (
+                                By.CSS_SELECTOR,
+                                'h3.lheight22.margintop5'
+                            )
+                        )
+                    )
+                ]
+            )
+            places_all = make_list_sublists(
+                [f.text for f in WebDriverWait(self, WebOlx.time_wait
+                    ).until(
+                        EC.presence_of_all_elements_located(
+                            (
+                                By.CSS_SELECTOR,
+                                'small.breadcrumb.x-normal'
+                            )
+                        )
+                    )
+                ], 3
+            )
+            places.extend([f[1] for f in places_all])
+            date.extend([f[2] for f in places_all])
+            links.extend([f.get_attribute('href')
+                for f in WebDriverWait(self, WebOlx.time_wait
+                    ).until(
+                        EC.presence_of_all_elements_located(
+                            (
+                                By.CSS_SELECTOR,
+                                'a.thumb.vtop.inlblk.rel.tdnone.linkWithHash.scale4.detailsLink'
+                            )
+                        )
+                    )
+                ]
+            )
+            value_link = self.check_element_clickable()
+        print(len(names), len(places), len(prices), len(links), len(date))

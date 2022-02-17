@@ -170,8 +170,9 @@ class ParseFlatfly(ParseMain):
                         )
                     )
                 )[-1]
+            # element_to_be_clickable
             WebDriverWait(button_press, WebFlatfy.time_wait).until(
-                EC.presence_of_element_located(
+                EC.element_to_be_clickable(
                     (
                         By.TAG_NAME, 
                         'canvas'
