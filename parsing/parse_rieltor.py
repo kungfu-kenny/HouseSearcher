@@ -11,6 +11,11 @@ class ParseRieltor(ParseMain):
     """
     def __init__(self, driver_path: str, text_insert:str='', text_district:str='', list_rooms:list=[]) -> None:
         super(ParseRieltor, self).__init__(driver_path)
+        self.text_insert = text_insert
+        self.text_district = text_district
+        self.list_rooms = list_rooms
+        self.check_district = bool(self.text_district)
+        self.check_text = bool(self.text_insert)
 
     def develop_city(self) -> None:
         """
@@ -36,6 +41,25 @@ class ParseRieltor(ParseMain):
                 element.click()
                 break
 
+    def develop_district_text(self) -> None:
+        """
+        Method which is dedicated to produce the selected district
+        Input:  None
+        Output: we developed the values of selected district & text
+        """
+        if self.check_district or self.check_text:
+            input_text = self.find_element_by_css_selector('input.nav_street_input')
+            input_text.click()
+            if self.check_text:
+                input_text.send_keys('мінська')
+            if self.check_district:
+                for element, but in zip(
+                    self.find_elements_by_css_selector('div.nav_item_option_rayon.js_nav_rayon'), 
+                    self.find_elements_by_css_selector('div.nav_item_rayon_checkbox')):
+                    if element.text == 'Оболонський':
+                        but.click()
+                        break
+
     def develop_search(self) -> None:
         """
         Method which is dedicated to produce the search button click
@@ -50,7 +74,7 @@ class ParseRieltor(ParseMain):
         Input:  value_element = element which is required to wait
         Output: we waited to load elements
         """
-        WebDriverWait(self, 5).until(
+        return WebDriverWait(self, 5).until(
             EC.visibility_of_all_elements_located(
                 (
                     By.CSS_SELECTOR, 
@@ -70,14 +94,20 @@ class ParseRieltor(ParseMain):
                 return link
         return False
 
-    def produce_search_elements_empty(self) -> list:
+    def produce_search_elements_empty(self, empty_search:str) -> list:
         """
         Method which is dedicated to develop the search elements of unneccessary element
-        Input:  
+        Input:  empty_search = element of the selected 
         Output: we developed the list of this values
         """
-        #TODO wrote here
-        pass
+        value_return = []
+        for f in self.wait_loading():
+            k = f.find_elements(By.CSS_SELECTOR, empty_search)
+            if k:
+                value_return.append(k[0].text)
+            else:
+                value_return.append('')
+        return value_return
 
     def produce_search_results(self) -> list:
         """
@@ -86,28 +116,21 @@ class ParseRieltor(ParseMain):
         self.get('https://rieltor.ua/flats-rent/')
         
         self.develop_city()
-        print('ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
+        print('We developed the city to search')
 
         self.develop_rent()
-        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        print('We developed rent status')
 
-        input_text = self.find_element_by_css_selector('input.nav_street_input')
-        input_text.click()
-        input_text.send_keys('мінська')
-        for element, but in zip(
-            self.find_elements_by_css_selector('div.nav_item_option_rayon.js_nav_rayon'), 
-            self.find_elements_by_css_selector('div.nav_item_rayon_checkbox')):
-            if element.text == 'Оболонський':
-                but.click()
-                break
-        print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+        self.develop_district_text()        
+        print('We developed location values')
         
         self.develop_search()
-        print('vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv')
+        print('We clicked on search button')
         
         self.wait_loading()
-        print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
-        streets = [f.text for f in self.find_elements_by_css_selector('div.catalog-item__title_street')]
+        print('We waited loading')
+        
+        streets = [f.text for f in self.wait_loading('div.catalog-item__title_street')]
         pprint(streets)
         print('===============================================================================')
         
@@ -123,27 +146,23 @@ class ParseRieltor(ParseMain):
         pprint(prices)
         print('===============================================================================')
         
-        #TODO rewrote as function
-        subways = [f.text for f in self.find_elements_by_css_selector('a.label.label_location.label_location_subway')]
+        subways = self.produce_search_elements_empty('a.label.label_location.label_location_subway')
         pprint(subways)
         print('===============================================================================')
         
-        #TODO rewrote as function
-        types = [f.text for f in self.find_elements_by_css_selector('span.label.label_attention')]
+        types = self.produce_search_elements_empty('span.label.label_attention')
         pprint(types)
         print('===============================================================================')
         
-        #TODO rewrote as function
-        commission = [f.text for f in self.find_elements_by_css_selector('span.label.label_no_commission')]
+        commission = self.produce_search_elements_empty('span.label.label_no_commission')
         pprint(commission)
         print('===============================================================================')
         
-        values = [f.text for f in self.find_elements_by_css_selector('div.catalog-item_info-item-row')]
+        values = self.produce_search_elements_empty('div.catalog-item_info-item-row')
         pprint(values)
         print('===============================================================================')
         
-        #TODO rewrote as function
-        descriptions = [f.text for f in self.find_elements_by_css_selector('p.catalog-item_info-item-row.catalog-item_info-description')]
+        descriptions = self.produce_search_elements_empty('p.catalog-item_info-item-row.catalog-item_info-description')
         print(descriptions[0])
         print('===============================================================================')
 
@@ -151,7 +170,6 @@ class ParseRieltor(ParseMain):
         ind = 1
         value_now = self.develop_values_further(ind)
 
-        #TODO add to the adding to the links
         while value_now:
             self.get(value_now)
             self.wait_loading()
@@ -173,7 +191,37 @@ class ParseRieltor(ParseMain):
                 [f.text for f in self.find_elements_by_css_selector('strong.catalog-item__price')]
             )
             
-            print(len(streets), len(links), len(districts), len(prices))
+            subways.extend(
+                self.produce_search_elements_empty('a.label.label_location.label_location_subway')
+            )
+
+            types.extend(
+                self.produce_search_elements_empty('span.label.label_attention')
+            )
+
+            commission.extend(
+                self.produce_search_elements_empty('span.label.label_no_commission')
+            )
+
+            values.extend(
+                self.produce_search_elements_empty('div.catalog-item_info-item-row')
+            )
+
+            descriptions.extend(
+                self.produce_search_elements_empty('p.catalog-item_info-item-row.catalog-item_info-description')
+            )
+            
+            print(
+                len(streets), 
+                len(links), 
+                len(districts), 
+                len(prices), 
+                len(subways), 
+                len(types), 
+                len(commission), 
+                len(values), 
+                len(descriptions)
+            )
             print('===============================================================================')
             
             ind += 1
