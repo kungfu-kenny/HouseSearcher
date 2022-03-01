@@ -85,32 +85,32 @@ class ParseOlx(ParseMain):
         Output: developed the rooms for the search
         """
         try:
-            self.implicitly_wait(10)
             print('Started checking the rooms')
-            WebDriverWait(self, WebOlx.time_wait).until(
-                EC.presence_of_all_elements_located(
-                    (
-                        By.CSS_SELECTOR, 
-                        'span.header.block'
-                        )
-                    ) and
-                EC.element_located_to_be_selected(
-                    (
-                        By.CSS_SELECTOR, 
-                        'div.filter-item.rel.filter-item-number_of_rooms_string'
-                        )
-                    ) and 
-                EC.element_to_be_clickable(
-                    (
-                        By.CSS_SELECTOR, 
-                        'div.filter-item.rel.filter-item-number_of_rooms_string'
+            div_search = WebDriverWait(self, WebOlx.time_wait).until(
+                    EC.element_to_be_clickable(
+                        (
+                            By.CSS_SELECTOR, 
+                            'div.filter-item.rel.filter-item-number_of_rooms_string'
+                            )
                         )
                     )
-                ).click()
+            # print(div_search)
+            # print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+            self.execute_script(
+                "arguments[0].click();",
+                WebDriverWait(div_search, WebOlx.time_wait).until(
+                    EC.element_to_be_clickable(
+                        (
+                            By.CSS_SELECTOR, 
+                            'span.icon.down.abs'
+                        )
+                    )
+                )
+            )
             print('Clicked')
-            for li in self.find_element_by_css_selector(
-                    'ul.small.suggestinput.bgfff.lheight20.br-3.abs.select.binded'
-                    ).find_elements(By.TAG_NAME, "li"):
+            for li in self.find_elements_by_css_selector(
+                'li.dynamic.clr.brbott-4'
+                ):
                 if li.text in self.list_rooms:
                     self.execute_script(
                         "arguments[0].click();", 
@@ -119,7 +119,7 @@ class ParseOlx(ParseMain):
                             'input'
                             )
                         )
-        except Exception:
+        except Exception as e:
             print('We could not set up the room settings')
     
     def produce_search_result_click(self) -> None:
@@ -191,8 +191,8 @@ class ParseOlx(ParseMain):
                     )
                 )
             )]
-        pprint(prices)
-        print('=============================================================')
+        # pprint(prices)
+        # print('=============================================================')
         names = [f.text for f in WebDriverWait(self, WebOlx.time_wait
             ).until(
                 EC.presence_of_all_elements_located(
@@ -202,8 +202,8 @@ class ParseOlx(ParseMain):
                     )
                 )
             )]
-        pprint(names)
-        print('=============================================================')
+        # pprint(names)
+        # print('=============================================================')
         
         places_all = make_list_sublists(
                 [f.text for f in WebDriverWait(self, WebOlx.time_wait
@@ -220,11 +220,11 @@ class ParseOlx(ParseMain):
         places = [f[1] for f in places_all]
         date = [f[2] for f in places_all]
         
-        pprint(places)
-        print('=============================================================')
+        # pprint(places)
+        # print('=============================================================')
         
-        pprint(date)
-        print('=============================================================')
+        # pprint(date)
+        # print('=============================================================')
         
         links = [
             f.get_attribute('href')
@@ -238,8 +238,8 @@ class ParseOlx(ParseMain):
                 )
             )
         ]
-        pprint(links)
-        print('=============================================================')
+        # pprint(links)
+        # print('=============================================================')
         
         value_ind = 2
         value_link = self.check_element_clickable()

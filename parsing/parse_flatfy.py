@@ -31,12 +31,12 @@ class ParseFlatfly(ParseMain):
             return 'любая'
         if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 15000:
             return 'до 15 000 грн'
-        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 20000:
-            return 'до 20 000 грн'
-        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 40000:
-            return 'до 40 000 грн'
-        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 60000:
-            return 'до 60 000 грн'
+        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 30000:
+            return 'до 30 000 грн'
+        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 50000:
+            return 'до 50 000 грн'
+        if (isinstance(value_price, int) or isinstance(value_price, float)) and value_price <= 80000:
+            return 'до 80 000 грн'
         
     @staticmethod
     def make_adress_check(value_list:list) -> set:
@@ -90,6 +90,23 @@ class ParseFlatfly(ParseMain):
             self.find_elements_by_css_selector(
                 'a.paging-nav--right.paging-button.paging-nav')) > 0
 
+    def execute_click(self, value_clicked:object) -> None:
+        """
+        Method which is dedicated to execute click on the basic values
+        Input:  value_clicked = object to the click execution
+        """
+        self.execute_script(
+                "arguments[0].click();", 
+                WebDriverWait(value_clicked, WebFlatfy.time_wait).until(
+                    EC.element_to_be_clickable(
+                        (
+                            By.CSS_SELECTOR, 
+                            'canvas.button-base__ripple'
+                        )
+                    )
+                )
+            )
+
     def produce_rooms_number(self) -> None:
         """
         Method which is dedicated to produce the rooms numbers to it
@@ -121,12 +138,17 @@ class ParseFlatfly(ParseMain):
                 if not value_select: value_select = True 
         
         if value_select:
-            v = self.find_element_by_css_selector(
-                'button.button-base.button-common.button-common--variant-text.'\
-                'button-common--size-small.button-common--primary.button-common--full-width')
-            v.find_element(
-                By.CSS_SELECTOR, 
-                'canvas.button-base__ripple').click()
+            self.execute_click(
+                WebDriverWait(self, WebFlatfy.time_wait).until(
+                    EC.element_to_be_clickable(
+                        (
+                            By.CSS_SELECTOR, 
+                            'button.button-base.button-common.button-common--variant-text.'\
+                            'button-common--size-small.button-common--primary.button-common--full-width'
+                        )
+                    )
+                )
+            )
         
     def produce_price_count(self) -> None:
         """
@@ -143,8 +165,12 @@ class ParseFlatfly(ParseMain):
                 )
             ).click()
         
-        value_check = self.find_element_by_css_selector('div#menu-price')
-        value_drop_price = value_check.find_element(By.CSS_SELECTOR, 'div.mui-list.mui-list--padding.menu-list')
+        value_drop_price =  self.find_element_by_css_selector(
+            'div#menu-price'
+            ).find_element(
+                By.CSS_SELECTOR, 
+                'div.mui-list.mui-list--padding.menu-list'
+        )
         ind = [f.text for f in value_drop_price.find_elements(
             By.CSS_SELECTOR, 
             'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button')
@@ -158,30 +184,18 @@ class ParseFlatfly(ParseMain):
         Output: None
         """
         if self.text:
-            input_text = self.find_element_by_id('downshift-0-input')
-            input_text.send_keys(self.text)
-            # button_press = self.find_elements_by_css_selector(
-            #     'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button')[-1]
-            button_press = WebDriverWait(self, WebFlatfy.time_wait).until(
-                EC.presence_of_all_elements_located(
-                    (
-                        By.CSS_SELECTOR, 
-                        'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button'
+            self.find_element_by_id('downshift-0-input').send_keys(self.text)
+            self.execute_click(
+                WebDriverWait(self, WebFlatfy.time_wait).until(
+                    EC.presence_of_all_elements_located(
+                        (
+                            By.CSS_SELECTOR, 
+                            'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button'
                         )
                     )
                 )[-1]
-            # element_to_be_clickable
-            WebDriverWait(button_press, WebFlatfy.time_wait).until(
-                EC.element_to_be_clickable(
-                    (
-                        By.TAG_NAME, 
-                        'canvas'
-                        )
-                    )
-                ).click()
-            # button_press.find_element(By.TAG_NAME, 'canvas').click()
-            # input_text.submit()
-
+            )
+            
     def produce_searched_links(self) -> list:
         """
         Method which is dedicated to return searched links
@@ -190,10 +204,15 @@ class ParseFlatfly(ParseMain):
         """
         self.wait_loading_elements('a.realty-preview-title__link')
         return  [
-            f.get_attribute('href') for f in self.find_elements_by_css_selector(
-                'a.realty-preview-title__link'
-            )
-        ]#[::2]
+            f.get_attribute('href') for f in WebDriverWait(self, WebFlatfy.time_wait).until(
+                EC.visibility_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'a.realty-preview-title__link'
+                        )
+                    )
+                )
+            ]
 
     def produce_searched_prices(self) -> list:
         """
@@ -233,7 +252,6 @@ class ParseFlatfly(ParseMain):
         Input:  value_base = multiple selector to wait
         Output: None
         """
-        # self.implicitly_wait(5)
         WebDriverWait(self, WebFlatfy.time_wait).until(
             EC.presence_of_all_elements_located(
                 (
@@ -345,17 +363,19 @@ class ParseFlatfly(ParseMain):
             value_repairs.extend(value_repair) 
             value_years.extend(value_year)
 
-        # print('Links', len(value_links))
-        # print('Prices', len(value_prices))
-        # print('Prices Sqr', len(value_prices_sqr))
-        # print('Streets Base', len(value_streets_basic))
-        # print('Descriptions', len(value_descriptions))
-        # print('Full addr', len(value_full_adresses))
-        # print('Sub dists', len(value_subdists))
-        # print('Cities', len(value_cities))
-        # print('Rooms', len(value_rooms))
-        # print('Square', len(value_squares))
-        # print('Floors', len(value_floors))
-        # print('Types', len(value_types))
-        # print('Repairs', len(value_repairs))
-        # print('Years', len(value_years))
+        print('Links', len(value_links))
+        print('Prices', len(value_prices))
+        print('Prices Sqr', len(value_prices_sqr))
+        print('Streets Base', len(value_streets_basic))
+        print('Descriptions', len(value_descriptions))
+        print('Full addr', len(value_full_adresses))
+        print('Sub dists', len(value_subdists))
+        print('Cities', len(value_cities))
+        print('Rooms', len(value_rooms))
+        print('Square', len(value_squares))
+        print('Floors', len(value_floors))
+        print('Types', len(value_types))
+        print('Repairs', len(value_repairs))
+        print('Years', len(value_years))
+        print('########################################################################')
+        

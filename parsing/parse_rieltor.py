@@ -131,54 +131,54 @@ class ParseRieltor(ParseMain):
         print('We waited loading')
         
         streets = [f.text for f in self.wait_loading('div.catalog-item__title_street')]
-        pprint(streets)
-        print('===============================================================================')
+        # pprint(streets)
+        # print('===============================================================================')
         
         links = [
             f.find_element(By.TAG_NAME, 'a').get_attribute('href') 
             for f in self.find_elements_by_css_selector('h2.catalog-item__title')
         ]
-        pprint(links)
-        print('===============================================================================')
+        # pprint(links)
+        # print('===============================================================================')
         
         districts = [
             f.text 
             for f in self.find_elements_by_css_selector('div.catalog-item__title_district')
         ]
-        pprint(districts)
-        print('===============================================================================')
+        # pprint(districts)
+        # print('===============================================================================')
         
         prices = [
             f.text 
             for f in self.find_elements_by_css_selector('strong.catalog-item__price')
         ]
-        pprint(prices)
-        print('===============================================================================')
+        # pprint(prices)
+        # print('===============================================================================')
         
         subways = self.produce_search_elements_empty(
             'a.label.label_location.label_location_subway')
-        pprint(subways)
-        print('===============================================================================')
+        # pprint(subways)
+        # print('===============================================================================')
         
         types = self.produce_search_elements_empty(
             'span.label.label_attention')
-        pprint(types)
-        print('===============================================================================')
+        # pprint(types)
+        # print('===============================================================================')
         
         commission = self.produce_search_elements_empty(
             'span.label.label_no_commission')
-        pprint(commission)
-        print('===============================================================================')
+        # pprint(commission)
+        # print('===============================================================================')
         
         values = self.produce_search_elements_empty(
             'div.catalog-item_info-item-row')
-        pprint(values)
-        print('===============================================================================')
+        # pprint(values)
+        # print('===============================================================================')
         
         descriptions = self.produce_search_elements_empty(
             'p.catalog-item_info-item-row.catalog-item_info-description')
-        print(descriptions[0])
-        print('===============================================================================')
+        # print(descriptions[0])
+        # print('===============================================================================')
 
         ind = 1
         value_now = self.develop_values_further(ind)
@@ -224,7 +224,9 @@ class ParseRieltor(ParseMain):
                 self.produce_search_elements_empty('p.catalog-item_info-item-row.catalog-item_info-description')
             )
             
-            print(
+            ind += 1
+            value_now = self.develop_values_further(ind)
+        print(
                 len(streets), 
                 len(links), 
                 len(districts), 
@@ -235,8 +237,6 @@ class ParseRieltor(ParseMain):
                 len(values), 
                 len(descriptions)
             )
-            print('===============================================================================')
+        print('===============================================================================')
             
-            ind += 1
-            value_now = self.develop_values_further(ind)
             
