@@ -12,16 +12,38 @@ class ParseOlx(ParseMain):
     """
     class which is dedicated to produce_values of the olx website
     """
-    def __init__(self, driver_path:str, text_insert:str='', text_district:str='', list_rooms:list=[]) -> None:
+    def __init__(self, driver_path:str, insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
         super(ParseOlx, self).__init__(driver_path)
-        self.link = self.produce_link(text_insert)
-        self.text_district = text_district
-        self.list_rooms = self.produce_list_rooms(list_rooms)
+        self.link = self.produce_link(insert)
+        self.text_district = district
+        self.list_rooms = self.produce_list_rooms(rooms)
+        self.price_bool = bool(price)
+        self.price = self.produce_price_value(price)
 
+    @staticmethod
+    def produce_price_value(price:int) -> str:
+        """
+        Static method which is dedicated to produce the selected price of it
+        Input:  price = int value of the price to use
+        Output: we developed the price to use on them
+        """
+        if price < 10:
+            return '10 грн.'
+        if 10 < price <= 100:
+            return '100 грн.'
+        if 100 < price < 1000:
+            return '1 000 грн.'
+        if 1000 <= price < 10000:
+            return '10 000 грн.'
+        if 10000 <= price < 100000:
+            return '100 000 грн.'
+        if 100000 <= price < 1000000:
+            return '1 000 000 грн.'
+            
     @staticmethod
     def produce_list_rooms(list_rooms:list) -> list:
         """
-        Static method which is dedicated 
+        Static method which is dedicated to get values of rooms
         Input:  list_rooms = list of the number rooms
         Output: list of the produce number rooms
         """
@@ -51,14 +73,17 @@ class ParseOlx(ParseMain):
         Input:  None
         Output: we developed the 
         """
-        WebDriverWait(self, WebOlx.time_wait).until(
-            EC.element_to_be_clickable(
-                (
+        self.execute_script(
+            "arguments[0].click();",
+            WebDriverWait(self, WebOlx.time_wait).until(
+                EC.element_to_be_clickable(
+                    (
                     By.CSS_SELECTOR, 
                     'span.header.block'
                     )
                 )
-            ).click()
+            )
+        )
 
         for li in WebDriverWait(self, WebOlx.time_wait).until(
             EC.element_to_be_clickable(
@@ -84,59 +109,76 @@ class ParseOlx(ParseMain):
         Input:  None
         Output: developed the rooms for the search
         """
-        try:
-            print('Started checking the rooms')
-            div_search = WebDriverWait(self, WebOlx.time_wait).until(
-                    EC.element_to_be_clickable(
-                        (
-                            By.CSS_SELECTOR, 
-                            'div.filter-item.rel.filter-item-number_of_rooms_string'
-                            )
-                        )
-                    )
-            # print(div_search)
-            # print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-            self.execute_script(
-                "arguments[0].click();",
-                WebDriverWait(div_search, WebOlx.time_wait).until(
-                    EC.element_to_be_clickable(
-                        (
-                            By.CSS_SELECTOR, 
-                            'span.icon.down.abs'
+        div_search = WebDriverWait(self, WebOlx.time_wait).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.CSS_SELECTOR, 
+                        'div.filter-item.rel.filter-item-number_of_rooms_string'
                         )
                     )
                 )
+        
+        self.execute_script(
+            "arguments[0].click();",
+            WebDriverWait(div_search, WebOlx.time_wait).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.CSS_SELECTOR, 
+                        'span.icon.down.abs'
+                    )
+                )
             )
-            print('Clicked')
-            for li in self.find_elements_by_css_selector(
-                'li.dynamic.clr.brbott-4'
-                ):
-                if li.text in self.list_rooms:
-                    self.execute_script(
-                        "arguments[0].click();", 
-                        li.find_element(
-                            By.TAG_NAME,
-                            'input'
-                            )
+        )
+        for li in self.find_elements_by_css_selector(
+            'li.dynamic.clr.brbott-4'
+            ):
+            if li.text in self.list_rooms:
+                self.execute_script(
+                    "arguments[0].click();", 
+                    li.find_element(
+                        By.TAG_NAME,
+                        'input'
                         )
-        except Exception as e:
-            print('We could not set up the room settings')
-    
+                    )
+
+    def produce_price(self) -> None:
+        """
+        Method which is dedicated to produce the price value if the search
+        Input:  None
+        Output: we created the values
+        """
+        k = self.find_element_by_css_selector('li#param_price')
+        k.find_element(By.CSS_SELECTOR, 'a.button.button-to.numeric.gray.block.fnormal.rel.zi3.clr').click()
+        
+        for m in WebDriverWait(k, WebOlx.time_wait).until(
+            EC.presence_of_all_elements_located(
+                (
+                    By.CSS_SELECTOR,
+                    'a.tdnone.block.c27.brbott-4.search-choose'
+                )
+            )
+        ):
+            if m.text == self.price:
+                m.click()
+                break
+
     def produce_search_result_click(self) -> None:
         """
         Method which is dedicated to produce the click of the searches
         Input:  None
         Output: we clicked on the search button
         """
-        WebDriverWait(self, WebOlx.time_wait).until(
-            EC.element_to_be_clickable(
-                (
-                    By.CSS_SELECTOR, 
-                    "input#search-submit"
+        self.execute_script(
+            "arguments[0].click();",
+            WebDriverWait(self, WebOlx.time_wait).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.CSS_SELECTOR, 
+                        "input#search-submit"
                     )
                 )
-            ).click()
-        # self.implicitly_wait(10)
+            )
+        )
         
     def check_element_clickable(self) -> bool:
         """
@@ -168,8 +210,18 @@ class ParseOlx(ParseMain):
         """
         self.get(self.link)
 
-        self.produce_search_district()
-        self.produce_search_rooms()
+        if self.list_rooms:
+            self.produce_search_rooms()
+            print('Added rooms')
+
+        if self.price_bool:
+            self.produce_price()
+            print('Added price')
+            
+        if self.text_district:
+            self.produce_search_district()
+            print('Added district')
+
         self.produce_search_result_click()
 
         WebDriverWait(self, WebOlx.time_wait).until(
