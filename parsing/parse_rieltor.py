@@ -9,13 +9,43 @@ class ParseRieltor(ParseMain):
     """
     class which is dedicated to parse the rieltor website
     """
-    def __init__(self, driver_path: str, text_insert:str='', text_district:str='', list_rooms:list=[]) -> None:
+    def __init__(self, driver_path: str, insert:str='', district:str='', rooms:list=[], price:int=0, currency:str='uah') -> None:
         super(ParseRieltor, self).__init__(driver_path)
-        self.text_insert = text_insert
-        self.text_district = text_district
-        self.list_rooms = list_rooms
+        self.text_insert = insert
+        self.text_district = district
+        self.list_rooms = [str(i) for i in rooms]
         self.check_district = bool(self.text_district)
         self.check_text = bool(self.text_insert)
+        self.currency = currency
+        self.currency_bool = self.currency == 'uah'
+        self.price_bool = bool(price)
+        self.price = self.develop_price_value(price, self.currency)
+
+    @staticmethod
+    def develop_price_value(price:int, currency:str='uah') -> str:
+        """
+        Static method which is dedicated to develop the price selected
+        Input:  price = value of selected prices to check flat
+                currency = currency to check
+        Output: string which is dedicated to get on click
+        """
+        if price < 10000 and currency == 'uah':
+            return 1#,'до 10\xa0000 грн/міс'
+        elif 10000 <= price < 15000 and currency == 'uah':
+            return 2#'від 10\xa0000 до 15\xa0000 грн/міс'
+        elif 15000 <= price < 30000 and currency == 'uah':
+            return 3#'від 15\xa0000 до 30\xa0000 грн/міс'
+        elif price >= 30000 and currency == 'uah':
+            return 4#'від 30\xa0000 грн/міс'
+        elif price < 350 and currency != 'uah':
+            return 5#'до 350 $/міс'
+        elif 350 <= price < 500 and currency != 'uah':
+            return 6#'від 350 до 500 $/міс'
+        elif 500 <= price < 1000 and currency != 'uah':
+            return 7#'від 500 до 1 000 $/міс'
+        elif price >= 1000 and currency != 'uah':
+            return 8#'від 1 000 $/міс'
+
 
     def develop_city(self) -> None:
         """
@@ -41,6 +71,80 @@ class ParseRieltor(ParseMain):
                 element.click()
                 break
 
+    def develop_room_number(self) -> None:
+        """
+        Method which is dedicated to search on the room numbers within the house
+        Input:  None
+        Output: we developed the number of rooms for it
+        """
+        value_cube = self.wait_loading('div.nav_items_wrap')[0].find_element(By.CSS_SELECTOR, 'div.nav_items_wr')
+        self.execute_script(
+            "arguments[0].click();",
+            value_cube.find_element(
+                By.CSS_SELECTOR, 
+                'div.nav_item_active_wr.js_open_nav'
+            )
+        )
+        for element in WebDriverWait(
+            value_cube, 5).until(
+                EC.visibility_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'div.nav_item_option.js_nav_option_many'
+                        )
+                    )
+                ):
+            if element.text in self.list_rooms:
+                self.execute_script(
+                    "arguments[0].click();",
+                    element
+                )
+
+    def develop_price(self) -> None:
+        """
+        Method which is dedicated to develop prices of the selected values
+        Input:  None
+        Output: we developed the price values which could be used
+        """
+        value_cube = self.find_element_by_css_selector('div.nav_items_wr.nav_items_wr_middle')
+        
+        self.execute_script(
+            "arguments[0].click();",
+            value_cube.find_element(
+                By.CSS_SELECTOR, 
+                'div.nav_item_active_wr.js_open_nav'
+            )
+        )
+        
+        try:
+            if self.price_bool:
+                self.execute_script(
+                    "arguments[0].click();",
+                    self.find_element_by_css_selector(
+                        'div.nav_items_wr.nav_items_wr_middle'
+                    ).find_elements(
+                        By.CSS_SELECTOR, 
+                        'div.nav_item_change_price')[1]
+                    )
+                print(self.price)
+                print('adfasssssssssssssssssssssssssssssssssssssssssssssssssskljhgfdklj;dghsljk;')
+        except Exception as e:
+            print(e)
+            print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        
+        self.execute_script(
+            "arguments[0].click();",
+            WebDriverWait(
+                value_cube, 5).until(
+                EC.presence_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'div.nav_item_option.js_nav_option'
+                        )
+                    )
+                )[self.price]
+        )
+            
     def develop_district_text(self) -> None:
         """
         Method which is dedicated to produce the selected district
@@ -119,11 +223,19 @@ class ParseRieltor(ParseMain):
         print('We developed the city to search')
 
         self.develop_rent()
-        print('We developed rent status')
+        print('We developed rent status')        
+
+        #TODO deal with this after
+        # if self.price_bool:
+        #     self.develop_price()
+        #     print('We develop price measure')
 
         self.develop_district_text()        
         print('We developed location values')
-        
+                        
+        self.develop_room_number()
+        print('We developed room number')
+
         self.develop_search()
         print('We clicked on search button')
         
