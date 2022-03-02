@@ -13,8 +13,8 @@ try:
     
     # parse_olx = ParseOlx(path_webdriver, 'минская', 'Оболонский', [2, 3], 20000).produce_search_results()
     # parse_flatfy = ParseFlatfly(path_webdriver, 'мінська', 'Оболонський', [2, 3], 20000).produce_search_results()
-    parse_rieltor = ParseRieltor(path_webdriver, 'минская', 'Оболонский', [2, 3], 23000).produce_search_results()
-    
+    parse_rieltor = ParseRieltor(path_webdriver, 'мінська', 'Оболонський', [2, 3], 23000).produce_search_results()
+
 except Exception as e:
     print(e)
     print('####################################################')

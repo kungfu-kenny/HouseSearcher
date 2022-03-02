@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from parsing.parse_main import ParseMain
 from config import WebRieltor, Message
 
+
 class ParseRieltor(ParseMain):
     """
     class which is dedicated to parse the rieltor website
@@ -32,21 +33,21 @@ class ParseRieltor(ParseMain):
         Output: string which is dedicated to get on click
         """
         if price < 10000 and currency == 'uah':
-            return 1#,'до 10\xa0000 грн/міс'
+            return 'до 10 000 грн/міс'
         elif 10000 <= price < 15000 and currency == 'uah':
-            return 2#'від 10\xa0000 до 15\xa0000 грн/міс'
+            return 'від 10 000 до 15 000 грн/міс'
         elif 15000 <= price < 30000 and currency == 'uah':
-            return 3#'від 15\xa0000 до 30\xa0000 грн/міс'
+            return 'від 15 000 до 30 000 грн/міс'
         elif price >= 30000 and currency == 'uah':
-            return 4#'від 30\xa0000 грн/міс'
+            return 'від 30 000 грн/міс'
         elif price < 350 and currency != 'uah':
-            return 5#'до 350 $/міс'
+            return 'до 350 $/міс'
         elif 350 <= price < 500 and currency != 'uah':
-            return 6#'від 350 до 500 $/міс'
+            return 'від 350 до 500 $/міс'
         elif 500 <= price < 1000 and currency != 'uah':
-            return 7#'від 500 до 1 000 $/міс'
+            return 'від 500 до 1 000 $/міс'
         elif price >= 1000 and currency != 'uah':
-            return 8#'від 1 000 $/міс'
+            return 'від 1 000 $/міс'
 
 
     def produce_search_city(self) -> None:
@@ -109,43 +110,34 @@ class ParseRieltor(ParseMain):
         Output: we developed the price values which could be used
         """
         value_cube = self.find_element_by_css_selector('div.nav_items_wr.nav_items_wr_middle')
-        
+            # WebDriverWait(self, WebRieltor.time_wait).until(
+            #     EC.presence_of_element_located(
+            #         (
+            #             By.CSS_SELECTOR, 
+            #             'div.nav_items_wr.nav_items_wr_middle'
+            #         )
+            #     )
+            # )
+        print(value_cube)
         self.execute_script(
             "arguments[0].click();",
-            value_cube.find_element(
-                By.CSS_SELECTOR, 
-                'div.nav_item_active_wr.js_open_nav'
-            )
+            value_cube.find_element('div.nav_item_active_wr.js_open_nav')
         )
-        
-        try:
-            if self.price_bool:
-                self.execute_script(
-                    "arguments[0].click();",
-                    self.find_element_by_css_selector(
-                        'div.nav_items_wr.nav_items_wr_middle'
-                    ).find_elements(
-                        By.CSS_SELECTOR, 
-                        'div.nav_item_change_price')[1]
-                    )
-                print(self.price)
-                print('adfasssssssssssssssssssssssssssssssssssssssssssssssssskljhgfdklj;dghsljk;')
-        except Exception as e:
-            print(e)
-            print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-        
-        self.execute_script(
-            "arguments[0].click();",
-            WebDriverWait(
-                value_cube, WebRieltor.time_wait).until(
-                EC.presence_of_all_elements_located(
-                    (
-                        By.CSS_SELECTOR, 
-                        'div.nav_item_option.js_nav_option'
-                        )
-                    )
-                )[self.price]
-        )
+        print('dfsaaaaaadffdfdfdfdf')
+        # for element in value_cube.find_elements(By.CSS_SELECTOR, 'div.nav_item_option.js_nav_option'):
+        # WebDriverWait(
+        #         value_cube, WebRieltor.time_wait).until(
+        #         EC.presence_of_all_elements_located(
+        #             (
+        #                 By.CSS_SELECTOR, 
+        #                 'div.nav_item_option.js_nav_option'
+        #                 )
+        #             )
+        #         ):
+            # if element.text == self.price:
+            #     print(element.text)
+            #     element.click()
+            #     print('dsadsadasdadas')
             
     def produce_search_district(self) -> None:
         """
@@ -156,12 +148,12 @@ class ParseRieltor(ParseMain):
         input_text = self.find_element_by_css_selector('input.nav_street_input')
         input_text.click()
         if self.check_text:
-            input_text.send_keys('мінська')
+            input_text.send_keys(self.text_insert)
         if self.check_district:
             for element, but in zip(
                 self.find_elements_by_css_selector('div.nav_item_option_rayon.js_nav_rayon'), 
                 self.find_elements_by_css_selector('div.nav_item_rayon_checkbox')):
-                if element.text == 'Оболонський':
+                if element.text == self.text_district:
                     but.click()
                     break
 
@@ -229,7 +221,7 @@ class ParseRieltor(ParseMain):
         #TODO deal with this after
         # if self.price_bool:
         #     self.produce_search_price()
-        #     print('We develop price measure')
+        #     self.produce_log(Message.message_price)
 
         if self.check_district or self.check_text:
             self.produce_search_district()        
