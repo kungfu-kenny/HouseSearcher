@@ -8,10 +8,13 @@ from parsing.parse_rieltor import ParseRieltor
 try:
     parse_web = ParseWebDriver()
     path_webdriver = parse_web.check_webdriver_main()
+    
     #TODO add here values of the list of the districts
-    parse_olx = ParseOlx(path_webdriver, 'минская', 'Оболонский', [2, 3], 15000).produce_search_results()
-    # parse_flatfy = ParseFlatfly(path_webdriver, [2, 3], 20000, 'мінська').produce_search_results()
-    # parse_rieltor = ParseRieltor(path_webdriver, 'минская', 'Оболонский', [2, 3], 23000).produce_search_results()
+    
+    # parse_olx = ParseOlx(path_webdriver, 'минская', 'Оболонский', [2, 3], 20000).produce_search_results()
+    # parse_flatfy = ParseFlatfly(path_webdriver, 'мінська', 'Оболонський', [2, 3], 20000).produce_search_results()
+    parse_rieltor = ParseRieltor(path_webdriver, 'минская', 'Оболонский', [2, 3], 23000).produce_search_results()
+    
 except Exception as e:
     print(e)
     print('####################################################')

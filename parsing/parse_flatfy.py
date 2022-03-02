@@ -1,27 +1,30 @@
 from pprint import pprint
 from tkinter.messagebox import NO
 from selenium.webdriver.common.by import By
-# from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utilities.work_lists import make_list_sublists, make_list_transpose
 from parsing.parse_main import ParseMain
-from config import WebFlatfy
+from config import WebFlatfy, Message
 
 
 class ParseFlatfly(ParseMain):
     """
     class which is dedicated to work with the flatly
     """
-    def __init__(self, driver_path: str, list_rooms:list=[], value_price:int=0, text:str='') -> None:
+    def __init__(self, driver_path:str, text:str='', district:str='', list_rooms:list=[], value_price:int=0) -> None:
         super(ParseFlatfly, self).__init__(driver_path)
+        self.used_db = WebFlatfy.name
+        self.web = WebFlatfy.link_start
         self.link = '/'.join([WebFlatfy.link_start, WebFlatfy.link_continue])
         self.text = text
-        self.price = self.produce_price(value_price)
+        self.district = district
+        self.price_bool = bool(value_price)
+        self.price = self.produce_price_value(value_price)
         self.list_rooms = self.produce_list_rooms(list_rooms)
         
     @staticmethod
-    def produce_price(value_price:int) -> str:
+    def produce_price_value(value_price:int) -> str:
         """
         Static method which is dedicated to get value price
         Input:  value_price = int value which was 
@@ -107,20 +110,23 @@ class ParseFlatfly(ParseMain):
                 )
             )
 
-    def produce_rooms_number(self) -> None:
+    def produce_search_rooms(self) -> None:
         """
         Method which is dedicated to produce the rooms numbers to it
         Input:  None
         Output: we developed values of the rooms
         """
-        WebDriverWait(self, WebFlatfy.time_wait).until(
+        self.execute_script(
+            "arguments[0].click();", 
+            WebDriverWait(self, WebFlatfy.time_wait).until(
             EC.presence_of_element_located(
                 (
                     By.CSS_SELECTOR, 
                     "button#menu-trigger-room_count"
                     )
                 )
-            ).click()
+            )
+        )
         
         value_list = self.find_element_by_css_selector(
             'div.mui-list.mui-list--padding.menu-list')
@@ -150,20 +156,23 @@ class ParseFlatfly(ParseMain):
                 )
             )
         
-    def produce_price_count(self) -> None:
+    def produce_search_price(self) -> None:
         """
         Method which is dedicated to work with the giving values
         Input:  given values of the price
         Output: None
         """
-        WebDriverWait(self, WebFlatfy.time_wait).until(
+        self.execute_script(
+            "arguments[0].click();", 
+            WebDriverWait(self, WebFlatfy.time_wait).until(
             EC.presence_of_element_located(
                 (
                     By.CSS_SELECTOR, 
                     "button#menu-trigger-price"
                     )
                 )
-            ).click()
+            )
+        )
         
         value_drop_price =  self.find_element_by_css_selector(
             'div#menu-price'
@@ -175,7 +184,17 @@ class ParseFlatfly(ParseMain):
             By.CSS_SELECTOR, 
             'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button')
             ].index(self.price)
-        value_drop_price.find_elements(By.TAG_NAME, 'canvas')[ind].click()#.button-base__ripple')
+        self.execute_script(
+                "arguments[0].click();", 
+                WebDriverWait(value_drop_price, WebFlatfy.time_wait).until(
+                    EC.visibility_of_all_elements_located(
+                        (
+                            By.CSS_SELECTOR, 
+                            'canvas.button-base__ripple'
+                        )
+                    )
+                )[ind]
+            )
 
     def produce_selected_text(self) -> None:
         """
@@ -183,18 +202,17 @@ class ParseFlatfly(ParseMain):
         Input:  None
         Output: None
         """
-        if self.text:
-            self.find_element_by_id('downshift-0-input').send_keys(self.text)
-            self.execute_click(
-                WebDriverWait(self, WebFlatfy.time_wait).until(
-                    EC.presence_of_all_elements_located(
-                        (
-                            By.CSS_SELECTOR, 
-                            'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button'
-                        )
+        self.find_element_by_id('downshift-0-input').send_keys(self.text)
+        self.execute_click(
+            WebDriverWait(self, WebFlatfy.time_wait).until(
+                EC.presence_of_all_elements_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'div.button-base.mui-list-item.mui-list-item--button.menu-list__item.menu-list__item--button'
                     )
-                )[-1]
-            )
+                )
+            )[-1]
+        )
             
     def produce_searched_links(self) -> list:
         """
@@ -258,6 +276,12 @@ class ParseFlatfly(ParseMain):
                     By.CSS_SELECTOR, 
                     value_base
                     )
+                ) and
+            EC.visibility_of_all_elements_located(
+                (
+                    By.CSS_SELECTOR, 
+                    value_base
+                    )
                 )
             )
 
@@ -279,12 +303,20 @@ class ParseFlatfly(ParseMain):
         """
         self.get(self.link)
         
-        self.produce_rooms_number()
-        self.produce_price_count()
-        self.produce_selected_text()
+        if self.price_bool:
+            self.produce_search_price()
+            self.produce_log(Message.message_price)
+
+        if self.list_rooms:
+            self.produce_search_rooms()
+            self.produce_log(Message.message_rooms)
+
+        if self.text:
+            self.produce_selected_text()
+            self.produce_log(Message.message_insert_text)
         
         self.wait_loading_elements()
-        print('The characteristics were set')
+        self.produce_log(Message.message_finish_settings)
         
         value_links = self.produce_searched_links()
         value_prices = self.produce_searched_prices()
@@ -313,9 +345,8 @@ class ParseFlatfly(ParseMain):
         value_ind = 1
         while self.get_value_bool():
             value_ind += 1
-            print(f'We found the other variations, check the {value_ind} page')
+            self.produce_log(f'We found the other variations, check the {value_ind} page')
             
-            # self.implicitly_wait(5)
             WebDriverWait(self, WebFlatfy.time_wait).until(
                 EC.presence_of_element_located(
                     (
@@ -324,7 +355,6 @@ class ParseFlatfly(ParseMain):
                         )
                     )
                 ).click()
-            # self.find_element_by_css_selector('a.paging-nav--right.paging-button.paging-nav').click()
             
             self.wait_loading_elements()
 
@@ -363,6 +393,7 @@ class ParseFlatfly(ParseMain):
             value_repairs.extend(value_repair) 
             value_years.extend(value_year)
 
+        self.produce_log(Message.message_done)
         print('Links', len(value_links))
         print('Prices', len(value_prices))
         print('Prices Sqr', len(value_prices_sqr))
@@ -378,4 +409,5 @@ class ParseFlatfly(ParseMain):
         print('Repairs', len(value_repairs))
         print('Years', len(value_years))
         print('########################################################################')
+        self.produce_log(Message.message_done_tr)
         

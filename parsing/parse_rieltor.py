@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from parsing.parse_main import ParseMain
-
+from config import WebRieltor, Message
 
 class ParseRieltor(ParseMain):
     """
@@ -11,6 +11,8 @@ class ParseRieltor(ParseMain):
     """
     def __init__(self, driver_path: str, insert:str='', district:str='', rooms:list=[], price:int=0, currency:str='uah') -> None:
         super(ParseRieltor, self).__init__(driver_path)
+        self.used_db = WebRieltor.name
+        self.web = WebRieltor.link_start
         self.text_insert = insert
         self.text_district = district
         self.list_rooms = [str(i) for i in rooms]
@@ -19,10 +21,10 @@ class ParseRieltor(ParseMain):
         self.currency = currency
         self.currency_bool = self.currency == 'uah'
         self.price_bool = bool(price)
-        self.price = self.develop_price_value(price, self.currency)
+        self.price = self.produce_price_value(price, self.currency)
 
     @staticmethod
-    def develop_price_value(price:int, currency:str='uah') -> str:
+    def produce_price_value(price:int, currency:str='uah') -> str:
         """
         Static method which is dedicated to develop the price selected
         Input:  price = value of selected prices to check flat
@@ -47,7 +49,7 @@ class ParseRieltor(ParseMain):
             return 8#'від 1 000 $/міс'
 
 
-    def develop_city(self) -> None:
+    def produce_search_city(self) -> None:
         """
         Method which is dedicated to develop search of the city
         Input:  None
@@ -59,7 +61,7 @@ class ParseRieltor(ParseMain):
                 element.click()
                 break
 
-    def develop_rent(self) -> None:
+    def produce_rent_status(self) -> None:
         """
         Method which is dedicated to develop the rent value
         Input:  None
@@ -71,13 +73,13 @@ class ParseRieltor(ParseMain):
                 element.click()
                 break
 
-    def develop_room_number(self) -> None:
+    def produce_search_rooms(self) -> None:
         """
         Method which is dedicated to search on the room numbers within the house
         Input:  None
         Output: we developed the number of rooms for it
         """
-        value_cube = self.wait_loading('div.nav_items_wrap')[0].find_element(By.CSS_SELECTOR, 'div.nav_items_wr')
+        value_cube = self.wait_loading_elements('div.nav_items_wrap')[0].find_element(By.CSS_SELECTOR, 'div.nav_items_wr')
         self.execute_script(
             "arguments[0].click();",
             value_cube.find_element(
@@ -86,7 +88,7 @@ class ParseRieltor(ParseMain):
             )
         )
         for element in WebDriverWait(
-            value_cube, 5).until(
+            value_cube, WebRieltor.time_wait).until(
                 EC.visibility_of_all_elements_located(
                     (
                         By.CSS_SELECTOR, 
@@ -100,7 +102,7 @@ class ParseRieltor(ParseMain):
                     element
                 )
 
-    def develop_price(self) -> None:
+    def produce_search_price(self) -> None:
         """
         Method which is dedicated to develop prices of the selected values
         Input:  None
@@ -135,7 +137,7 @@ class ParseRieltor(ParseMain):
         self.execute_script(
             "arguments[0].click();",
             WebDriverWait(
-                value_cube, 5).until(
+                value_cube, WebRieltor.time_wait).until(
                 EC.presence_of_all_elements_located(
                     (
                         By.CSS_SELECTOR, 
@@ -145,26 +147,25 @@ class ParseRieltor(ParseMain):
                 )[self.price]
         )
             
-    def develop_district_text(self) -> None:
+    def produce_search_district(self) -> None:
         """
         Method which is dedicated to produce the selected district
         Input:  None
         Output: we developed the values of selected district & text
         """
-        if self.check_district or self.check_text:
-            input_text = self.find_element_by_css_selector('input.nav_street_input')
-            input_text.click()
-            if self.check_text:
-                input_text.send_keys('мінська')
-            if self.check_district:
-                for element, but in zip(
-                    self.find_elements_by_css_selector('div.nav_item_option_rayon.js_nav_rayon'), 
-                    self.find_elements_by_css_selector('div.nav_item_rayon_checkbox')):
-                    if element.text == 'Оболонський':
-                        but.click()
-                        break
+        input_text = self.find_element_by_css_selector('input.nav_street_input')
+        input_text.click()
+        if self.check_text:
+            input_text.send_keys('мінська')
+        if self.check_district:
+            for element, but in zip(
+                self.find_elements_by_css_selector('div.nav_item_option_rayon.js_nav_rayon'), 
+                self.find_elements_by_css_selector('div.nav_item_rayon_checkbox')):
+                if element.text == 'Оболонський':
+                    but.click()
+                    break
 
-    def develop_search(self) -> None:
+    def produce_search_result_click(self) -> None:
         """
         Method which is dedicated to produce the search button click
         Input:  None
@@ -172,13 +173,13 @@ class ParseRieltor(ParseMain):
         """
         self.find_element_by_css_selector('button.nav_search_btn').click()
 
-    def wait_loading(self, value_element:str="div.catalog-item__info") -> None:
+    def wait_loading_elements(self, value_element:str="div.catalog-item__info") -> None:
         """
         Method which is dedicated to develop the load of the 
         Input:  value_element = element which is required to wait
         Output: we waited to load elements
         """
-        return WebDriverWait(self, 5).until(
+        return WebDriverWait(self, WebRieltor.time_wait).until(
             EC.visibility_of_all_elements_located(
                 (
                     By.CSS_SELECTOR, 
@@ -205,7 +206,7 @@ class ParseRieltor(ParseMain):
         Output: we developed the list of this values
         """
         value_return = []
-        for f in self.wait_loading():
+        for f in self.wait_loading_elements():
             k = f.find_elements(By.CSS_SELECTOR, empty_search)
             if k:
                 value_return.append(k[0].text)
@@ -217,87 +218,75 @@ class ParseRieltor(ParseMain):
         """
         Method which is dedicated to return values of the results by the flats
         """
-        self.get('https://rieltor.ua/flats-rent/')
+        self.get(WebRieltor.link_continue)
         
-        self.develop_city()
-        print('We developed the city to search')
+        self.produce_search_city()
+        self.produce_log(Message.message_city)
 
-        self.develop_rent()
-        print('We developed rent status')        
+        self.produce_rent_status()
+        self.produce_log(Message.message_status_rent)        
 
         #TODO deal with this after
         # if self.price_bool:
-        #     self.develop_price()
+        #     self.produce_search_price()
         #     print('We develop price measure')
 
-        self.develop_district_text()        
-        print('We developed location values')
-                        
-        self.develop_room_number()
-        print('We developed room number')
+        if self.check_district or self.check_text:
+            self.produce_search_district()        
+            if self.check_district:
+                self.produce_log(Message.message_district)
+            if self.check_text:
+                self.produce_log(Message.message_insert_text)
 
-        self.develop_search()
-        print('We clicked on search button')
+        if self.list_rooms:  
+            self.produce_search_rooms()
+            self.produce_log(Message.message_rooms)
+
+        self.produce_search_result_click()
+        self.produce_log(Message.message_click)
         
-        self.wait_loading()
-        print('We waited loading')
+        self.wait_loading_elements()
+        print(Message.message_finish_settings)
         
-        streets = [f.text for f in self.wait_loading('div.catalog-item__title_street')]
-        # pprint(streets)
-        # print('===============================================================================')
+        streets = [f.text for f in self.wait_loading_elements('div.catalog-item__title_street')]
         
         links = [
             f.find_element(By.TAG_NAME, 'a').get_attribute('href') 
             for f in self.find_elements_by_css_selector('h2.catalog-item__title')
         ]
-        # pprint(links)
-        # print('===============================================================================')
         
         districts = [
             f.text 
             for f in self.find_elements_by_css_selector('div.catalog-item__title_district')
         ]
-        # pprint(districts)
-        # print('===============================================================================')
         
         prices = [
             f.text 
             for f in self.find_elements_by_css_selector('strong.catalog-item__price')
         ]
-        # pprint(prices)
-        # print('===============================================================================')
         
         subways = self.produce_search_elements_empty(
             'a.label.label_location.label_location_subway')
-        # pprint(subways)
-        # print('===============================================================================')
         
         types = self.produce_search_elements_empty(
             'span.label.label_attention')
-        # pprint(types)
-        # print('===============================================================================')
         
         commission = self.produce_search_elements_empty(
             'span.label.label_no_commission')
-        # pprint(commission)
-        # print('===============================================================================')
         
         values = self.produce_search_elements_empty(
             'div.catalog-item_info-item-row')
-        # pprint(values)
-        # print('===============================================================================')
         
         descriptions = self.produce_search_elements_empty(
             'p.catalog-item_info-item-row.catalog-item_info-description')
-        # print(descriptions[0])
-        # print('===============================================================================')
-
-        ind = 1
-        value_now = self.develop_values_further(ind)
+        
+        value_ind = 1
+        value_now = self.develop_values_further(value_ind)
 
         while value_now:
+            self.produce_log(f'We found the other variations, check the {value_ind + 1} page')
             self.get(value_now)
-            self.wait_loading()
+            self.wait_loading_elements()
             
             streets.extend(
                 [f.text for f in self.find_elements_by_css_selector('div.catalog-item__title_street')]
@@ -336,8 +325,10 @@ class ParseRieltor(ParseMain):
                 self.produce_search_elements_empty('p.catalog-item_info-item-row.catalog-item_info-description')
             )
             
-            ind += 1
-            value_now = self.develop_values_further(ind)
+            value_ind += 1
+            value_now = self.develop_values_further(value_ind)
+
+        self.produce_log(Message.message_done)
         print(
                 len(streets), 
                 len(links), 
@@ -350,5 +341,5 @@ class ParseRieltor(ParseMain):
                 len(descriptions)
             )
         print('===============================================================================')
-            
+        self.produce_log(Message.message_done_tr)
             

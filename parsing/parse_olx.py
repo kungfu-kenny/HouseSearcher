@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utilities.work_lists import make_list_sublists
 from parsing.parse_main import ParseMain
-from config import WebOlx
+from config import WebOlx, Message
 
 
 class ParseOlx(ParseMain):
@@ -14,6 +14,8 @@ class ParseOlx(ParseMain):
     """
     def __init__(self, driver_path:str, insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
         super(ParseOlx, self).__init__(driver_path)
+        self.used_db = WebOlx.name
+        self.web = WebOlx.link_start
         self.link = self.produce_link(insert)
         self.text_district = district
         self.list_rooms = self.produce_list_rooms(rooms)
@@ -64,8 +66,8 @@ class ParseOlx(ParseMain):
         Output: link which would be further parsed
         """
         if text_insert:
-            return f"{WebOlx.link}/q-{text_insert.lower()}/"
-        return WebOlx.link
+            return f"{WebOlx.link_continue}/q-{text_insert.lower()}/"
+        return WebOlx.link_continue
 
     def produce_search_district(self) -> None:
         """
@@ -141,7 +143,7 @@ class ParseOlx(ParseMain):
                         )
                     )
 
-    def produce_price(self) -> None:
+    def produce_search_price(self) -> None:
         """
         Method which is dedicated to produce the price value if the search
         Input:  None
@@ -180,6 +182,21 @@ class ParseOlx(ParseMain):
             )
         )
         
+    def wait_loading_elements(self) -> None:
+        """
+        Method which is dedicated to load all possible elements to grab
+        Input:  None
+        Output: we develop loading of the elements
+        """
+        WebDriverWait(self, WebOlx.time_wait).until(
+            EC.visibility_of_all_elements_located(
+                (
+                    By.CSS_SELECTOR,
+                    'td.title-cell'
+                )
+            )
+        )
+
     def check_element_clickable(self) -> bool:
         """
         Method which is dedicated to check next link
@@ -212,27 +229,22 @@ class ParseOlx(ParseMain):
 
         if self.list_rooms:
             self.produce_search_rooms()
-            print('Added rooms')
+            self.produce_log(Message.message_rooms)
 
         if self.price_bool:
-            self.produce_price()
-            print('Added price')
+            self.produce_search_price()
+            self.produce_log(Message.message_price)
             
         if self.text_district:
             self.produce_search_district()
-            print('Added district')
+            self.produce_log(Message.message_district)
 
         self.produce_search_result_click()
+        self.produce_log(Message.message_click)
 
-        WebDriverWait(self, WebOlx.time_wait).until(
-            EC.visibility_of_all_elements_located(
-                (
-                    By.CSS_SELECTOR,
-                    'td.title-cell'
-                )
-            )
-        )
-        print('Done the adding values')
+        self.wait_loading_elements()
+        
+        self.produce_log(Message.message_finish_settings)
         
         prices = [f.text for f in WebDriverWait(self, WebOlx.time_wait
             ).until(
@@ -243,8 +255,7 @@ class ParseOlx(ParseMain):
                     )
                 )
             )]
-        # pprint(prices)
-        # print('=============================================================')
+        
         names = [f.text for f in WebDriverWait(self, WebOlx.time_wait
             ).until(
                 EC.presence_of_all_elements_located(
@@ -254,8 +265,6 @@ class ParseOlx(ParseMain):
                     )
                 )
             )]
-        # pprint(names)
-        # print('=============================================================')
         
         places_all = make_list_sublists(
                 [f.text for f in WebDriverWait(self, WebOlx.time_wait
@@ -272,12 +281,6 @@ class ParseOlx(ParseMain):
         places = [f[1] for f in places_all]
         date = [f[2] for f in places_all]
         
-        # pprint(places)
-        # print('=============================================================')
-        
-        # pprint(date)
-        # print('=============================================================')
-        
         links = [
             f.get_attribute('href')
             for f in WebDriverWait(self, WebOlx.time_wait
@@ -290,23 +293,16 @@ class ParseOlx(ParseMain):
                 )
             )
         ]
-        # pprint(links)
-        # print('=============================================================')
         
         value_ind = 2
         value_link = self.check_element_clickable()
         while value_link:
             self.get(value_link)
-            print(f'We found the other variations, check the {value_ind} page')
+            self.produce_log(f'We found the other variations, check the {value_ind} page')
             value_ind += 1
-            WebDriverWait(self, WebOlx.time_wait).until(
-                EC.visibility_of_all_elements_located(
-                    (
-                        By.CSS_SELECTOR,
-                        'td.title-cell'
-                    )
-                )
-            )
+
+            self.wait_loading_elements()
+            
             prices.extend(
                 [f.text for f in WebDriverWait(self, WebOlx.time_wait
                     ).until(
@@ -358,4 +354,8 @@ class ParseOlx(ParseMain):
                 ]
             )
             value_link = self.check_element_clickable()
+        self.produce_log(Message.message_done)
+        
+        #TODO add here the first version of transformation
         print(len(names), len(places), len(prices), len(links), len(date))
+        self.produce_log(Message.message_done_tr)
