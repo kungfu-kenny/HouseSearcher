@@ -1,6 +1,7 @@
 import sys, os
 from parsing.parse_webdriver import ParseWebDriver
 from parsing.parse_olx import ParseOlx
+from parsing.parse_domria import ParseDomria
 from parsing.parse_flatfy import ParseFlatfly
 from parsing.parse_rieltor import ParseRieltor
 
@@ -13,7 +14,8 @@ try:
     
     # parse_olx = ParseOlx(path_webdriver, 'минская', 'Оболонский', [2, 3], 20000).produce_search_results()
     # parse_flatfy = ParseFlatfly(path_webdriver, 'мінська', 'Оболонський', [2, 3], 20000).produce_search_results()
-    parse_rieltor = ParseRieltor(path_webdriver, 'мінська', 'Оболонський', [2, 3], 23000).produce_search_results()
+    # parse_rieltor = ParseRieltor(path_webdriver, 'мінська', 'Оболонський', [2, 3], 23000).produce_search_results()
+    parse_domria = ParseDomria(path_webdriver, 'мінська', 'Оболонський', [2, 3], 23000).produce_search_results()
 
 except Exception as e:
     print(e)

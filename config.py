@@ -1,5 +1,4 @@
 import os
-from time import time
 from dotenv import load_dotenv
 
 
@@ -35,6 +34,12 @@ class WebRieltor:
     time_wait = 10
     link_start = 'https://rieltor.ua'
     link_continue = 'https://rieltor.ua/flats-rent/'
+
+class WebDomria:
+    name = 'domria'
+    time_wait = 10
+    link_start = 'https://dom.ria.com'
+    link_continue = 'https://dom.ria.com/uk/'
 
 class Message:
     message_click = 'Clicked to search results'
