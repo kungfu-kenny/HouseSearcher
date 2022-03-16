@@ -113,28 +113,56 @@ class ParseDomria(ParseMain):
         #         f.click()
         #         break
 
-        #TODO change here to explicit wait
+        # #TODO change here to explicit wait
+        # # self.find_element_by_id('mainAdditionalParams_0').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
+        # self.find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
+        # # before = self.find_element_by_id('235_from')
+        # # print(before)
+        # # before.send_keys('0')
+        # # print('0')
+        # after = self.find_element_by_id('235_to')
+        # print(after)
+        # after.send_keys('20000')
+        # print(20000)
+        # # self.find_element_by_id('235_to').send_keys(Keys.RETURN)
+        # # self.find_element_by_css_selector('div.search-popups.options').click()
+        # # self.find_element_by_css_selector('div.button-search.flex.f-center.f-text-c.small').click()
         # self.find_element_by_id('mainAdditionalParams_0').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
-        self.find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
-        # before = self.find_element_by_id('235_from')
-        # print(before)
-        # before.send_keys('0')
-        # print('0')
-        after = self.find_element_by_id('235_to')
-        print(after)
-        after.send_keys('20000')
-        print(20000)
-        # self.find_element_by_id('235_to').send_keys(Keys.RETURN)
-        # self.find_element_by_css_selector('div.search-popups.options').click()
-        # self.find_element_by_css_selector('div.button-search.flex.f-center.f-text-c.small').click()
-        self.find_element_by_id('mainAdditionalParams_0').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
-        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
-        self.find_element_by_css_selector('div#mainAdditionalParams_1').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
-        # self.find_element(By.CSS_SELECTOR,'div.item-pseudoselect.form-selected.small').click()
-        # print(self.find_elements_by_css_selector('div.item-pseudoselect.form-selected.small'))
-        # print('xxxxxccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc')
-        # print(self.find_elements_by_css_selector('div.item-pseudoselect.form-selected.small')[1])
-        #.click()
+        # self.find_element_by_css_selector('div#mainAdditionalParams_1').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
+        # for element in self.find_elements_by_css_selector('label.tabs-item'):
+        #     if element.text in ['2', '3']:
+        #         print(element)
+        #         print(element.text)
+        #         # element.click()
+        #         print('!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+        # self.find_element_by_css_selector('div#mainAdditionalParams_1').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
+        
+        #TODO add here values to wait
+        # self.implicitly_wait(5)
+        self.find_elements_by_css_selector('button.button-border.small')[1].click()
+        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        print(self.find_elements_by_css_selector("section.realty-item.isStringView"))
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+
+        value_price = [f.text for f in self.find_elements_by_css_selector('b.size18')]
+        pprint(value_price)
+
+        value_links = [f.get_attribute('href') for f in self.find_elements_by_css_selector('a.realty-link.size22.bold.mb-10.break.b')]
+        pprint(value_links)
+
+        value_adress = [f.text for f in self.find_elements_by_css_selector('a.realty-link.size22.bold.mb-10.break.b')]
+        pprint(value_adress)
+
+        print('>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+        print(len(value_price), len(value_links), len(value_adress))
+
+        # span mb-5 grey -> address accurate
+        # span mt-10 chars grey -> room parameters
+        # mt-15 text pointer desc-hidden -> desc
+        # size14 flex mt-10 -> datetime
+        # flex f-center b grey mt-10 -> subway to check
+
         import time
         time.sleep(5)
