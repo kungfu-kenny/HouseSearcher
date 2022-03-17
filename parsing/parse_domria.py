@@ -1,3 +1,4 @@
+import time
 from pprint import pprint
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -293,27 +294,19 @@ class ParseDomria(ParseMain):
         Output: boolean value which checks presence of next values
         """
         if len(self.find_elements_by_css_selector('span.page-item.next.text-r')) > 0:
-            return True#self.find_element_by_css_selector('span.page-item.next.text-r').click()
+            return True
         return False
 
-    def produce_search_click_next(self) -> None:
+    def produce_search_click_next(self, value_ind:int=1) -> None:
         """
         Method which is dedicated to click and find next values
-        Input:  None
+        Input:  value_ind = index value which is about to search
         Output: we found the click to the next value
         """
-        print(111)
-        WebDriverWait(self, WebDomria.time_wait).until(
-            EC.element_to_be_clickable(
-                (
-                    By.CSS_SELECTOR, 
-                    'span.page-item.next.text-r'
-                )
-            )
-        )
-        print(112)
-        self.find_element_by_css_selector('span.page-item.next.text-r').click()
-        print(113)
+        for f in self.find_elements_by_css_selector('a.button-border'):
+            if f.text == str(value_ind):
+                self.execute_script("arguments[0].click();", f)
+                break
 
     def produce_search_selected(self, value_used:str, value_searched:str) -> list:
         """
@@ -377,8 +370,7 @@ class ParseDomria(ParseMain):
         
         self.produce_log(Message.message_finish_settings)
         self.wait_loading_elements()
-        self.implicitly_wait(2)
-
+        
         value_links = [f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
         value_price = [f.text for f in self.wait_loading_elements('b.size18')]
         value_address = [f.text for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
@@ -386,26 +378,18 @@ class ParseDomria(ParseMain):
         value_description = [f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')]
         value_date = [f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')]
         print(len(value_price), len(value_links), len(value_address), len(value_date), len(value_address_full), len(value_description))
-
         value_ind = 1
-        if self.produce_check_presence_links():
-            self.produce_search_click_next()
-            self.wait_loading_elements()
-            import time
-            time.sleep(30)
-            self.implicitly_wait(5)
+        while self.produce_check_presence_links():
             value_ind += 1
+            self.produce_search_click_next(value_ind)
+            self.wait_loading_elements()
             self.produce_log(f'We found the other variations, check the {value_ind} page')
+            
             value_links.extend([f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
-            print(value_ind, 1)
             value_price.extend([f.text for f in self.wait_loading_elements('b.size18')])
-            print(value_ind, 2)
             value_address.extend([f.text for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
-            print(value_ind, 3)
             value_address_full.extend([f.get_attribute('title') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
-            print(value_ind, 4)
             value_description.extend([f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')])
-            print(value_ind, 5)
             value_date.extend([f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')])
 
         print('..................................................................................................')
