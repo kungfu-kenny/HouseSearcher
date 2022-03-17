@@ -16,7 +16,7 @@ class ParseDomria(ParseMain):
         self.used_db = WebDomria.name
         self.web = WebDomria.link_start
         self.link = WebDomria.link_continue
-        self.text = insert
+        self.text = insert.lower().strip()
         self.district = district
         self.price_bool = bool(price)
         self.price = price
@@ -43,13 +43,58 @@ class ParseDomria(ParseMain):
                 f.click()
                 break
 
+    def produce_selected_text_check(self) -> None:
+        """
+        Method which is dedicated to return the check of the adequate text
+        Input:  None
+        Output: we developed the check of the selected text
+        """
+        try:
+            for f in WebDriverWait(self, 5).until(
+                    EC.presence_of_all_elements_located(
+                        (
+                            By.CLASS_NAME, 
+                            'item'
+                        )
+                    )
+                ):
+                if f.text.lower() == self.text:
+                    return True
+            return False
+        except Exception as e:
+            return False
+
+    def produce_selected_text(self) -> None:
+        """
+        Method which is dedicated to add the selected text and filtrate
+        Input:  None
+        Output: we added the basic filtration for it
+        """
+        self.find_element_by_id('autocomplete-1').send_keys(self.text)
+        
+        if not self.produce_selected_text_check():
+            for _ in self.text:
+                self.find_element_by_id('autocomplete-1').send_keys(Keys.BACK_SPACE)
+            return
+        for f in WebDriverWait(self, 5).until(
+                EC.presence_of_all_elements_located(
+                    (
+                        By.CLASS_NAME, 
+                        'item'
+                    )
+                )
+            ):
+            if self.text in f.text.lower():
+                f.click()
+                break
+
     def produce_search_price(self) -> None:
         """
         Method which is dedicated to add the price status of the search
         Input:  None
         Output: we developed the price filter
         """
-        WebDriverWait(self, 5).until(
+        WebDriverWait(self, WebDomria.time_wait).until(
             EC.presence_of_element_located(
                 (
                     By.CSS_SELECTOR, 
@@ -58,14 +103,13 @@ class ParseDomria(ParseMain):
             )
         )
         
-        WebDriverWait(self, 5).until(
+        WebDriverWait(self, WebDomria.time_wait).until(
             EC.element_to_be_clickable(
                 (
                     By.CSS_SELECTOR, 
                     'div.first-letter.overflowed.greyChars'
                 )
-            )
-            and EC.presence_of_element_located(
+            ) and EC.presence_of_element_located(
                 (
                     By.CSS_SELECTOR, 
                     'div.first-letter.overflowed.greyChars'
@@ -73,7 +117,7 @@ class ParseDomria(ParseMain):
             )
         ).click()
         
-        after = WebDriverWait(self, 5).until(
+        after = WebDriverWait(self, WebDomria.time_wait).until(
             EC.presence_of_element_located(
                 (
                     By.ID, 
@@ -81,9 +125,9 @@ class ParseDomria(ParseMain):
                 )
             )
         )
-        after.send_keys('20000')
+        after.send_keys(self.price)
         
-        WebDriverWait(self, 5).until(
+        WebDriverWait(self, WebDomria.time_wait).until(
             EC.element_to_be_clickable(
                 (
                     By.CSS_SELECTOR, 
@@ -110,7 +154,15 @@ class ParseDomria(ParseMain):
         Input:  values of the inserted city
         Output: we developed the city search for the flat
         """
-        #TODO add after here checkings
+        #TODO add after here checking & check here
+        WebDriverWait(self, WebDomria.time_wait).until(
+            EC.presence_of_element_located(
+                (
+                    By.ID, 
+                    'autocomplete'
+                )
+            )
+        )
         k = self.find_element_by_id('autocomplete')
         #TODO add here the selected values
         k.send_keys('Київ')
@@ -122,7 +174,10 @@ class ParseDomria(ParseMain):
         Input:  values of the inserted city
         Output: we developed the district searched for the flat
         """
-        pass
+        for types in self.find_elements_by_css_selector('label.tabs-item'):
+            if types.text.lower() == self.district.lower():
+                types.click()
+                break
 
     def produce_search_rooms(self) -> None:
         """
@@ -131,7 +186,7 @@ class ParseDomria(ParseMain):
         Output: we developed the rooms searches
         """
         WebDriverWait(
-            self.find_element_by_css_selector('div#mainAdditionalParams_1'), 5).until(
+            self.find_element_by_css_selector('div#mainAdditionalParams_1'), WebDomria.time_wait).until(
             EC.element_to_be_clickable(
                 (
                     By.CSS_SELECTOR, 
@@ -148,7 +203,7 @@ class ParseDomria(ParseMain):
         
         for element in self.find_elements_by_css_selector('label.tabs-item'):
             if element.text:
-                if element.text in ['2', '3']:
+                if element.text in self.list_rooms:
                     element.click()
         
         self.find_element_by_css_selector(
@@ -172,7 +227,15 @@ class ParseDomria(ParseMain):
         Input:  None
         Output: we developed the check the values
         """
-        return self.find_element_by_css_selector('button.button-border.small.active.noClickEvent').text == 'Списком'
+        return \
+            WebDriverWait(self, WebDomria.time_wait).until(
+                EC.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR, 
+                        'button.button-border.small.active.noClickEvent'
+                    )
+                )
+            ).text == 'Списком'
 
     def produce_search_type_markup(self) -> None:
         """
@@ -180,7 +243,7 @@ class ParseDomria(ParseMain):
         Input:  None
         Output: we developed the type of the selected markup which would be shown
         """
-        for f in WebDriverWait(self, 5).until(
+        for f in WebDriverWait(self, WebDomria.time_wait).until(
             EC.presence_of_all_elements_located(
                 (
                     By.CSS_SELECTOR, 
@@ -191,120 +254,159 @@ class ParseDomria(ParseMain):
             if f.text == 'Списком':
                 f.click()
 
-    def wait_loading_elements(self) -> None:
+    def produce_search_district_text(self) -> None:
+        """
+        Method which is dedicated to develop the distrinct or text to
+        Input:  None
+        Output: we clicked on the selected values
+        """
+        WebDriverWait(self, WebDomria.time_wait).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.CSS_SELECTOR, 
+                        'label#geo-box'
+                    )
+                )
+            )
+        self.find_element_by_css_selector('input#autocomplete-1').click()
+
+    def wait_loading_elements(self, value_wait:str='section.realty-item.isStringView') -> None:
         """
         Method which is dedicated to develop the load waiting for all values
-        Input:  None
+        Input:  value_wait = css selector to wait
         Output: we produced the waiting to the wait of the selected elements
         """
-        pass
+        WebDriverWait(self, WebDomria.time_wait).until(
+            EC.presence_of_all_elements_located(
+                (
+                    By.CSS_SELECTOR,
+                    value_wait
+                )
+            )
+        )
+        return self.find_elements_by_css_selector(value_wait)
+
+    def produce_check_presence_links(self) -> bool:
+        """
+        Method which is dedicated to check presence of the links
+        Input:  None
+        Output: boolean value which checks presence of next values
+        """
+        if len(self.find_elements_by_css_selector('span.page-item.next.text-r')) > 0:
+            return True#self.find_element_by_css_selector('span.page-item.next.text-r').click()
+        return False
+
+    def produce_search_click_next(self) -> None:
+        """
+        Method which is dedicated to click and find next values
+        Input:  None
+        Output: we found the click to the next value
+        """
+        print(111)
+        WebDriverWait(self, WebDomria.time_wait).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR, 
+                    'span.page-item.next.text-r'
+                )
+            )
+        )
+        print(112)
+        self.find_element_by_css_selector('span.page-item.next.text-r').click()
+        print(113)
+
+    def produce_search_selected(self, value_used:str, value_searched:str) -> list:
+        """
+        Method which is dedicated to get values from the search elements
+        Input:  value_used = selector where to search
+                value_searched = selector of element which is search
+        Output: we developed list of the selected values which were searched
+        """
+        value_return = []
+        for f in self.find_elements_by_css_selector(value_used):
+            value_check = f.find_elements(By.CSS_SELECTOR, value_searched)
+            if value_check:
+                value_return.append(value_check[0].text)
+            else: value_return.append('')
+        return value_return
 
     def produce_search_results(self) -> None:
         """
-        Method which is dedicated to work with th
+        Method which is dedicated to work with the search
+        Input:  None
+        Output: we developed the dataframe of selected values
         """
         self.get(WebDomria.link_start)
         
         self.produce_rent_status()
-        #TODO add here the logger
-        print('We added rent status')
+        self.produce_log(Message.message_status_rent)
         
         self.produce_search_city_basic()
-        #TODO add here the logger
-        print('We added basic city to this value')
+        self.produce_log(Message.message_city_basic)
         
         self.produce_search_result_click()
-        #TODO add here the logger
-        print('We added click on the search button')
+        self.produce_log(Message.message_click)
         
         if self.produce_search_type_markup_check():
-            #TODO add here logger
-            print('We added check of the right markup and everything is okay')
+            self.produce_log(Message.message_markup_success)
         else:
-            #TODO add here logger
-            print('We added check of the right markup and we need change it')
+            self.produce_log(Message.message_markup_fail)
             self.produce_search_type_markup()
-            print('We added the type of the markup')
-            
+            self.produce_log(Message.message_markup_change)
 
+        self.produce_search_city()
+        self.produce_log(Message.message_city)
+        
         if self.price_bool:
-            self.produce_search_city()
-            #TODO add here the logger
-            print('We added city to this value')
+            self.produce_search_price()
+            self.produce_log(Message.message_price)
 
-        self.produce_search_price()
-        #TODO add here logger
-        print('We added the price to this value')
+        if self.list_rooms:
+            self.produce_search_rooms()
+            self.produce_log(Message.message_rooms)
 
-        self.produce_search_rooms()
-        #TODO add here logger
-        print('We added the rooms to this value')
-
-        import time
-        time.sleep(5)
-
-        return
-
-        # self.find_element_by_id('autocomplete-1').click()
+        if self.text or self.district:
+            self.produce_search_district_text()
+            if self.district:
+                self.produce_search_district()
+                self.produce_log(Message.message_district)
+            
+            if self.text:
+                self.produce_selected_text()
+                self.produce_log(Message.message_insert_text)
         
-        # WebDriverWait(self, 5).until(
-        #     EC.element_to_be_clickable(
-        #         (
-        #             By.CSS_SELECTOR, 
-        #             'label#geo-box'#'input#autocomplete-1' #item-pseudoselect autocomplete-open
-        #         )
-        #     )
-        # )
-        # print(14)
-        # self.find_element_by_css_selector('input#autocomplete-1').click()
-        # print('cccccccccccccccccccccccccccccccccccccccccccccccccccccc')
-        
-        # for types in self.find_elements_by_css_selector('label.tabs-item'):
-        #     if types.text == 'Оболонський':
-        #         types.click()
-        #         break
-        # print('?>????????????????????????????????????????????????????????????????')
-        # self.find_element_by_id('autocomplete-1').send_keys('мінська')
-        
-        
-        # print('5555555555555555555555555555555')
-        # for f in WebDriverWait(self, 5).until(
-        #     EC.presence_of_all_elements_located(
-        #         (
-        #             By.CLASS_NAME, 
-        #             'item'
-        #         )
-        #     )
-        # ):
-        #     if 'мінська' in f.text.lower():
-        #         f.click()
-        #         break
-        # print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-        
-        # self.find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
+        self.produce_log(Message.message_finish_settings)
+        self.wait_loading_elements()
+        self.implicitly_wait(2)
 
-        #TODO add here values to wait
-        # self.implicitly_wait(5)
-        # self.find_elements_by_css_selector('button.button-border.small')[1].click()
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+        value_links = [f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
+        value_price = [f.text for f in self.wait_loading_elements('b.size18')]
+        value_address = [f.text for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
+        value_address_full = [f.get_attribute('title') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
+        value_description = [f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')]
+        value_date = [f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')]
+        print(len(value_price), len(value_links), len(value_address), len(value_date), len(value_address_full), len(value_description))
 
-        value_price = [f.text for f in self.find_elements_by_css_selector('b.size18')]
-        pprint(value_price)
+        value_ind = 1
+        if self.produce_check_presence_links():
+            self.produce_search_click_next()
+            self.wait_loading_elements()
+            import time
+            time.sleep(30)
+            self.implicitly_wait(5)
+            value_ind += 1
+            self.produce_log(f'We found the other variations, check the {value_ind} page')
+            value_links.extend([f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
+            print(value_ind, 1)
+            value_price.extend([f.text for f in self.wait_loading_elements('b.size18')])
+            print(value_ind, 2)
+            value_address.extend([f.text for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
+            print(value_ind, 3)
+            value_address_full.extend([f.get_attribute('title') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
+            print(value_ind, 4)
+            value_description.extend([f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')])
+            print(value_ind, 5)
+            value_date.extend([f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')])
 
-        value_links = [f.get_attribute('href') for f in self.find_elements_by_css_selector('a.realty-link.size22.bold.mb-10.break.b')]
-        pprint(value_links)
-
-        value_adress = [f.text for f in self.find_elements_by_css_selector('a.realty-link.size22.bold.mb-10.break.b')]
-        pprint(value_adress)
-
-        print('>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
-        print(len(value_price), len(value_links), len(value_adress))
-
-        # span mb-5 grey -> address accurate
-        # span mt-10 chars grey -> room parameters
-        # mt-15 text pointer desc-hidden -> desc
-        # size14 flex mt-10 -> datetime
-        # flex f-center b grey mt-10 -> subway to check
-
-        import time
-        time.sleep(5)
+        print('..................................................................................................')
+        print(len(value_price), len(value_links), len(value_address), len(value_date), len(value_address_full), len(value_description))

@@ -52,3 +52,7 @@ class Message:
     message_finish_settings = 'Finished the search settings'
     message_done = 'Done with search'
     message_done_tr = 'Done with data transformation to the file'
+    message_city_basic = 'Added city on the start page by clicking on it'
+    message_markup_success = 'Added check of the right markup and everything is okay'
+    message_markup_fail = 'Added check of the right markup and we need change it'
+    message_markup_change = 'Added the type of the markup'
