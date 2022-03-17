@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from parsing.parse_main import ParseMain
 from config import WebDomria, Message
 
+
 class ParseDomria(ParseMain):
     """
     class which is dedicated to parse the domria website and return selected values
@@ -18,86 +19,244 @@ class ParseDomria(ParseMain):
         self.text = insert
         self.district = district
         self.price_bool = bool(price)
-        self.price =price
+        self.price = price
         self.list_rooms = self.produce_list_rooms(rooms)
 
     @staticmethod
     def produce_list_rooms(rooms) -> list:
         """
-        
+        Method which is dedicated to work with the
+        Input:  rooms = list with the int room values
+        Output: we developed the selected values
         """
-        pass
+        return [str(f) for f in rooms]
+
+    def produce_rent_status(self) -> None:
+        """
+        Method which is dedicated to add the rent status to the beginning of the search
+        Input:  None
+        Output: we developed the adding to the rent status
+        """
+        self.find_element_by_css_selector('div.item-pseudoselect.pointer').click()
+        for f in self.find_elements(By.CSS_SELECTOR, 'div.item'):
+            if f.text == 'Орендувати квартиру':
+                f.click()
+                break
+
+    def produce_search_price(self) -> None:
+        """
+        Method which is dedicated to add the price status of the search
+        Input:  None
+        Output: we developed the price filter
+        """
+        WebDriverWait(self, 5).until(
+            EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR, 
+                    'div#mainAdditionalParams_0'
+                )
+            )
+        )
+        
+        WebDriverWait(self, 5).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR, 
+                    'div.first-letter.overflowed.greyChars'
+                )
+            )
+            and EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR, 
+                    'div.first-letter.overflowed.greyChars'
+                )
+            )
+        ).click()
+        
+        after = WebDriverWait(self, 5).until(
+            EC.presence_of_element_located(
+                (
+                    By.ID, 
+                    '235_to'
+                )
+            )
+        )
+        after.send_keys('20000')
+        
+        WebDriverWait(self, 5).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR, 
+                    'button.button-search.flex.f-center.f-text-c.small.boxed'
+                )
+            )
+        ).click()
+
+    def produce_search_city_basic(self)-> None:
+        """
+        Method which is dedicated to work with the search
+        Input:  None
+        Output: we developed if necessary 
+        """
+        value_input = self.find_element_by_css_selector('input#autocomplete')
+        value_input.click()
+        #TODO change here to the non basic
+        value_input.send_keys('Київ, Київська область')
+        value_input.send_keys(Keys.ENTER)
 
     def produce_search_city(self) -> None:
         """
-        
+        Method which is dedicated to add search of the city
+        Input:  values of the inserted city
+        Output: we developed the city search for the flat
         """
-        pass
+        #TODO add after here checkings
+        k = self.find_element_by_id('autocomplete')
+        #TODO add here the selected values
+        k.send_keys('Київ')
+        k.send_keys(Keys.ENTER)
 
     def produce_search_district(self) -> None:
         """
-        
+        Method which is dedicated to produce the district of the selected
+        Input:  values of the inserted city
+        Output: we developed the district searched for the flat
         """
         pass
 
     def produce_search_rooms(self) -> None:
         """
-        
+        Method which is dedicated to add filters for the searched rooms
+        Input:  None
+        Output: we developed the rooms searches
         """
-        pass
-
+        WebDriverWait(
+            self.find_element_by_css_selector('div#mainAdditionalParams_1'), 5).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR, 
+                    'div.first-letter.overflowed.greyChars'
+                )
+            )
+        )
+        self.find_element_by_css_selector(
+            'div#mainAdditionalParams_1'
+        ).find_element(
+                By.CSS_SELECTOR,
+                'div.first-letter.overflowed.greyChars'
+            ).click()
+        
+        for element in self.find_elements_by_css_selector('label.tabs-item'):
+            if element.text:
+                if element.text in ['2', '3']:
+                    element.click()
+        
+        self.find_element_by_css_selector(
+            'div#mainAdditionalParams_1'
+        ).find_element(
+                By.CSS_SELECTOR,
+                'button.button-search.flex.f-center.f-text-c.small.boxed'
+            ).click()
+        
     def produce_search_result_click(self) -> None:
         """
-        
+        Method which is dedicated to produce the search button click after the all filters
+        Input:  None
+        Output: we developed the click for the search
+        """
+        self.find_element_by_css_selector('a.flex.f-space.f-center.button-search').click()
+
+    def produce_search_type_markup_check(self) -> bool:
+        """
+        Method which is dedicated to work with the markup selected
+        Input:  None
+        Output: we developed the check the values
+        """
+        return self.find_element_by_css_selector('button.button-border.small.active.noClickEvent').text == 'Списком'
+
+    def produce_search_type_markup(self) -> None:
+        """
+        Method which is dedicated to produce the list values of the filtration
+        Input:  None
+        Output: we developed the type of the selected markup which would be shown
+        """
+        for f in WebDriverWait(self, 5).until(
+            EC.presence_of_all_elements_located(
+                (
+                    By.CSS_SELECTOR, 
+                    'button.button-border.small'
+                )
+            )
+        ):
+            if f.text == 'Списком':
+                f.click()
+
+    def wait_loading_elements(self) -> None:
+        """
+        Method which is dedicated to develop the load waiting for all values
+        Input:  None
+        Output: we produced the waiting to the wait of the selected elements
         """
         pass
-
-    # d
 
     def produce_search_results(self) -> None:
         """
         Method which is dedicated to work with th
         """
-        self.get('https://dom.ria.com')#/uk/arenda-kvartir/kiev/')
-        print('dsssssssssssssssssssssssssssssss')
-        # item-pseudoselect pointer
-        value_check = self.find_element_by_css_selector('div.item-pseudoselect.pointer')
-        print(value_check)
-        value_check.click()
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+        self.get(WebDomria.link_start)
         
-        for f in self.find_elements(By.CSS_SELECTOR, 'div.item'):
-            if f.text == 'Орендувати квартиру':
-                print(f.text)
-                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-                f.click()
-                break
+        self.produce_rent_status()
+        #TODO add here the logger
+        print('We added rent status')
         
-        value_input = self.find_element_by_css_selector('input#autocomplete')
-        print(value_input)
-        value_input.click()
-        print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,')
+        self.produce_search_city_basic()
+        #TODO add here the logger
+        print('We added basic city to this value')
         
-        #TODO change here of the change development
-        value_input.send_keys('Київ, Київська область')
-        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-        value_input.send_keys(Keys.ENTER)
-        print('ccccccccccccccccccccccccccccccccccccccccccccccc')
+        self.produce_search_result_click()
+        #TODO add here the logger
+        print('We added click on the search button')
+        
+        if self.produce_search_type_markup_check():
+            #TODO add here logger
+            print('We added check of the right markup and everything is okay')
+        else:
+            #TODO add here logger
+            print('We added check of the right markup and we need change it')
+            self.produce_search_type_markup()
+            print('We added the type of the markup')
+            
 
-        value_check = self.find_element_by_css_selector('a.flex.f-space.f-center.button-search')
-        # print(value_check)
-        value_check.click()
+        if self.price_bool:
+            self.produce_search_city()
+            #TODO add here the logger
+            print('We added city to this value')
 
-        # k = self.find_element_by_id('autocomplete')
-        # print(k)
-        # print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
-        # k.send_keys('Київ')
-        # print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
-        # # k.submit()
-        # k.send_keys(Keys.ENTER)
-        # print('33333333333333333333333333333')
+        self.produce_search_price()
+        #TODO add here logger
+        print('We added the price to this value')
+
+        self.produce_search_rooms()
+        #TODO add here logger
+        print('We added the rooms to this value')
+
+        import time
+        time.sleep(5)
+
+        return
 
         # self.find_element_by_id('autocomplete-1').click()
+        
+        # WebDriverWait(self, 5).until(
+        #     EC.element_to_be_clickable(
+        #         (
+        #             By.CSS_SELECTOR, 
+        #             'label#geo-box'#'input#autocomplete-1' #item-pseudoselect autocomplete-open
+        #         )
+        #     )
+        # )
+        # print(14)
+        # self.find_element_by_css_selector('input#autocomplete-1').click()
         # print('cccccccccccccccccccccccccccccccccccccccccccccccccccccc')
         
         # for types in self.find_elements_by_css_selector('label.tabs-item'):
@@ -107,43 +266,26 @@ class ParseDomria(ParseMain):
         # print('?>????????????????????????????????????????????????????????????????')
         # self.find_element_by_id('autocomplete-1').send_keys('мінська')
         
-        # #TODO change here to explicit wait
-        # for f in self.find_elements_by_class_name('item'):
+        
+        # print('5555555555555555555555555555555')
+        # for f in WebDriverWait(self, 5).until(
+        #     EC.presence_of_all_elements_located(
+        #         (
+        #             By.CLASS_NAME, 
+        #             'item'
+        #         )
+        #     )
+        # ):
         #     if 'мінська' in f.text.lower():
         #         f.click()
         #         break
-
-        # #TODO change here to explicit wait
-        # # self.find_element_by_id('mainAdditionalParams_0').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
-        # self.find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
-        # # before = self.find_element_by_id('235_from')
-        # # print(before)
-        # # before.send_keys('0')
-        # # print('0')
-        # after = self.find_element_by_id('235_to')
-        # print(after)
-        # after.send_keys('20000')
-        # print(20000)
-        # # self.find_element_by_id('235_to').send_keys(Keys.RETURN)
-        # # self.find_element_by_css_selector('div.search-popups.options').click()
-        # # self.find_element_by_css_selector('div.button-search.flex.f-center.f-text-c.small').click()
-        # self.find_element_by_id('mainAdditionalParams_0').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
-        # print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-
-        # self.find_element_by_css_selector('div#mainAdditionalParams_1').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
-        # for element in self.find_elements_by_css_selector('label.tabs-item'):
-        #     if element.text in ['2', '3']:
-        #         print(element)
-        #         print(element.text)
-        #         # element.click()
-        #         print('!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-        # self.find_element_by_css_selector('div#mainAdditionalParams_1').find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
+        # print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
         
+        # self.find_element(By.CSS_SELECTOR,'div.first-letter.overflowed.greyChars').click()
+
         #TODO add here values to wait
         # self.implicitly_wait(5)
-        self.find_elements_by_css_selector('button.button-border.small')[1].click()
-        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-        print(self.find_elements_by_css_selector("section.realty-item.isStringView"))
+        # self.find_elements_by_css_selector('button.button-border.small')[1].click()
         print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
 
         value_price = [f.text for f in self.find_elements_by_css_selector('b.size18')]
