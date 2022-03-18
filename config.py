@@ -40,6 +40,8 @@ class WebDomria:
     time_wait = 10
     link_start = 'https://dom.ria.com'
     link_continue = 'https://dom.ria.com/uk/'
+    list_check = 'Списком'
+    rent_status = 'Орендувати квартиру'
 
 class Message:
     message_click = 'Clicked to search results'

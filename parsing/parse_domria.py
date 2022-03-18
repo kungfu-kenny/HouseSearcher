@@ -40,7 +40,7 @@ class ParseDomria(ParseMain):
         """
         self.find_element_by_css_selector('div.item-pseudoselect.pointer').click()
         for f in self.find_elements(By.CSS_SELECTOR, 'div.item'):
-            if f.text == 'Орендувати квартиру':
+            if f.text == WebDomria.rent_status:
                 f.click()
                 break
 
@@ -104,20 +104,29 @@ class ParseDomria(ParseMain):
             )
         )
         
-        WebDriverWait(self, WebDomria.time_wait).until(
-            EC.element_to_be_clickable(
-                (
-                    By.CSS_SELECTOR, 
-                    'div.first-letter.overflowed.greyChars'
-                )
-            ) and EC.presence_of_element_located(
-                (
-                    By.CSS_SELECTOR, 
-                    'div.first-letter.overflowed.greyChars'
+        self.execute_script(
+            "arguments[0].click();", 
+            WebDriverWait(
+                WebDriverWait(self, WebDomria.time_wait).until(
+                    EC.presence_of_element_located(
+                        (
+                            By.CSS_SELECTOR, 
+                            'div#mainAdditionalParams_0'
+                        )
+                    )
+                ), 
+                WebDomria.time_wait
+            ).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.CSS_SELECTOR, 
+                        'div.first-letter.overflowed.greyChars'
+                    )
                 )
             )
-        ).click()
-        
+        )
+        # self.execute_script("window.stop();")
+
         after = WebDriverWait(self, WebDomria.time_wait).until(
             EC.presence_of_element_located(
                 (
@@ -166,6 +175,7 @@ class ParseDomria(ParseMain):
         )
         k = self.find_element_by_id('autocomplete')
         #TODO add here the selected values
+        k.click()
         k.send_keys('Київ')
         k.send_keys(Keys.ENTER)
 
@@ -186,8 +196,24 @@ class ParseDomria(ParseMain):
         Input:  None
         Output: we developed the rooms searches
         """
+        WebDriverWait(self, WebDomria.time_wait).until(
+            EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR, 
+                    'div#mainAdditionalParams_1'
+                )
+            )
+        )
+        
         WebDriverWait(
-            self.find_element_by_css_selector('div#mainAdditionalParams_1'), WebDomria.time_wait).until(
+            WebDriverWait(self, WebDomria.time_wait).until(
+            EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR, 
+                    'div#mainAdditionalParams_1'
+                )
+            )
+        ), WebDomria.time_wait).until(
             EC.element_to_be_clickable(
                 (
                     By.CSS_SELECTOR, 
@@ -196,8 +222,8 @@ class ParseDomria(ParseMain):
             )
         )
         self.find_element_by_css_selector(
-            'div#mainAdditionalParams_1'
-        ).find_element(
+                'div#mainAdditionalParams_1'
+            ).find_element(
                 By.CSS_SELECTOR,
                 'div.first-letter.overflowed.greyChars'
             ).click()
@@ -208,8 +234,8 @@ class ParseDomria(ParseMain):
                     element.click()
         
         self.find_element_by_css_selector(
-            'div#mainAdditionalParams_1'
-        ).find_element(
+                'div#mainAdditionalParams_1'
+            ).find_element(
                 By.CSS_SELECTOR,
                 'button.button-search.flex.f-center.f-text-c.small.boxed'
             ).click()
@@ -236,7 +262,7 @@ class ParseDomria(ParseMain):
                         'button.button-border.small.active.noClickEvent'
                     )
                 )
-            ).text == 'Списком'
+            ).text == WebDomria.list_check
 
     def produce_search_type_markup(self) -> None:
         """
@@ -252,7 +278,7 @@ class ParseDomria(ParseMain):
                 )
             )
         ):
-            if f.text == 'Списком':
+            if f.text == WebDomria.list_check:
                 f.click()
 
     def produce_search_district_text(self) -> None:
@@ -270,7 +296,7 @@ class ParseDomria(ParseMain):
                 )
             )
         self.find_element_by_css_selector('input#autocomplete-1').click()
-
+        
     def wait_loading_elements(self, value_wait:str='section.realty-item.isStringView') -> None:
         """
         Method which is dedicated to develop the load waiting for all values
@@ -331,6 +357,7 @@ class ParseDomria(ParseMain):
         """
         self.get(WebDomria.link_start)
         
+        #TODO finally check the values of the workplace
         self.produce_rent_status()
         self.produce_log(Message.message_status_rent)
         
@@ -349,14 +376,6 @@ class ParseDomria(ParseMain):
 
         self.produce_search_city()
         self.produce_log(Message.message_city)
-        
-        if self.price_bool:
-            self.produce_search_price()
-            self.produce_log(Message.message_price)
-
-        if self.list_rooms:
-            self.produce_search_rooms()
-            self.produce_log(Message.message_rooms)
 
         if self.text or self.district:
             self.produce_search_district_text()
@@ -368,6 +387,15 @@ class ParseDomria(ParseMain):
                 self.produce_selected_text()
                 self.produce_log(Message.message_insert_text)
         
+        if self.price_bool:
+            self.produce_search_price()
+            self.produce_log(Message.message_price)
+        
+        if self.list_rooms:
+            self.produce_search_rooms()
+            self.produce_log(Message.message_rooms)
+
+        
         self.produce_log(Message.message_finish_settings)
         self.wait_loading_elements()
         
@@ -377,7 +405,7 @@ class ParseDomria(ParseMain):
         value_address_full = [f.get_attribute('title') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
         value_description = [f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')]
         value_date = [f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')]
-        print(len(value_price), len(value_links), len(value_address), len(value_date), len(value_address_full), len(value_description))
+        
         value_ind = 1
         while self.produce_check_presence_links():
             value_ind += 1
@@ -385,12 +413,15 @@ class ParseDomria(ParseMain):
             self.wait_loading_elements()
             self.produce_log(f'We found the other variations, check the {value_ind} page')
             
-            value_links.extend([f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
             value_price.extend([f.text for f in self.wait_loading_elements('b.size18')])
             value_address.extend([f.text for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
             value_address_full.extend([f.get_attribute('title') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
+            value_links.extend([f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
             value_description.extend([f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')])
             value_date.extend([f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')])
 
+        self.produce_log(Message.message_done)
         print('..................................................................................................')
         print(len(value_price), len(value_links), len(value_address), len(value_date), len(value_address_full), len(value_description))
+        self.produce_log(Message.message_done_tr)
+        
