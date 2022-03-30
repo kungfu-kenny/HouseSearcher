@@ -14,6 +14,7 @@ class ParseAdress(ParseMain):
     """
     def __init__(self, driver_path:str, insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
         super(ParseAdress, self).__init__(driver_path)
+        self.city = 'киев'
 
     @staticmethod
     def produce_list_rooms(rooms:list) -> list:
@@ -39,9 +40,11 @@ class ParseAdress(ParseMain):
     
     def produce_check_kyiv_development(self) -> bool:
         """
-        Method which is dedicated to check that 
+        Method which is dedicated to check that it is kyiv developed
+        Input:  None
+        Output: boolean value which is about check that we are using the kyiv 
         """
-        pass
+        return self.city.strip().lower() == 'киев'
 
     def produce_search_city(self) -> None:
         """
@@ -50,10 +53,22 @@ class ParseAdress(ParseMain):
         Output: we developed the city values
         """
         self.find_element_by_id('input-15').click()
+        #TODO add here the system about the houses
+
+    def produce_check_active_city(self) -> bool:
+        """
+        Method which is dedicated to develop the city check
+        Input:  value_string = value of the selected string for getting
+        Output: we developed the check of the selected current value
+        """
+        # item active
+        pass
 
     def produce_search_district(self) -> None:
         """
-        
+        Method which is dedicated to search the district values
+        Input:  None
+        Output: we put the click on this button
         """
         pass
 
@@ -65,6 +80,6 @@ class ParseAdress(ParseMain):
         """
         self.get('https://address.ua')
         self.produce_rent_status()
-        time.sleep(2)
+        # time.sleep(2)
         self.produce_search_city()
-        time.sleep(2)
+        # time.sleep(2)
