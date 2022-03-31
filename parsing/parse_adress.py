@@ -203,37 +203,36 @@ class ParseAdress(ParseMain):
             self.produce_search_district()
         self.produce_search_result_click()
         
-        room = self.rooms[0]
-
-        self.produce_search_rooms(room)
-        
         if self.price_bool and self.price_click:
-            self.produce_search_price()
+                self.produce_search_price()
         elif self.price_bool and not self.price_click:
             self.produce_search_price_manually()
 
-        self.produce_search_result_click_send()
+        for room in self.rooms:
+            self.produce_search_rooms(room)
+                        
+            self.produce_search_result_click_send()
 
-        value_adress = [f.text for f in self.find_elements_by_css_selector('a.link-item')]
-        pprint(value_adress)
-        print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
-        
-        value_links = [f.get_attribute('href') for f in self.find_elements_by_css_selector('a.link-item')]
-        pprint(value_links)
-        print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
-        
-        value_dates = [f.text for f in self.find_elements_by_css_selector('div.last-edit')]
-        pprint(value_dates)
-        print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
+            value_adress = [f.text for f in self.find_elements_by_css_selector('a.link-item')]
+            pprint(value_adress)
+            print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
+            
+            value_links = [f.get_attribute('href') for f in self.find_elements_by_css_selector('a.link-item')]
+            pprint(value_links)
+            print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
+            
+            value_dates = [f.text for f in self.find_elements_by_css_selector('div.last-edit')]
+            pprint(value_dates)
+            print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
 
-        value_prices = [f.text for f in self.find_elements_by_css_selector('p.full-price.label')]
-        pprint(value_prices)
-        print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
+            value_prices = [f.text for f in self.find_elements_by_css_selector('p.full-price.label')]
+            pprint(value_prices)
+            print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
 
-        value_desc = [f.text for f in self.find_elements_by_css_selector('p.text')]
-        pprint(value_desc[0])
-        print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
+            value_desc = [f.text for f in self.find_elements_by_css_selector('p.text')]
+            pprint(value_desc[0])
+            print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm')
 
-        value_room = [room for _ in value_links]
+            value_room = [room for _ in value_links]
 
-        value_square, value_floor = self.produce_search_square_floor()
+            value_square, value_floor = self.produce_search_square_floor()
