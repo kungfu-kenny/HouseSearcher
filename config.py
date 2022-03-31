@@ -43,6 +43,14 @@ class WebDomria:
     list_check = 'Списком'
     rent_status = 'Орендувати квартиру'
 
+class Address:
+    name = 'adress'
+    time_wait = 10
+    time_sleep = 1
+    link_start = 'https://address.ua'
+    rent_status = 'Снять'
+    city_kyiv = 'киев'
+
 class Message:
     message_click = 'Clicked to search results'
     message_city = 'Added city to the search results'
