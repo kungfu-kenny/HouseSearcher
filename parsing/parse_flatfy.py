@@ -1,5 +1,4 @@
 from pprint import pprint
-from tkinter.messagebox import NO
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -12,12 +11,12 @@ class ParseFlatfly(ParseMain):
     """
     class which is dedicated to work with the flatly
     """
-    def __init__(self, driver_path:str, text:str='', district:str='', list_rooms:list=[], value_price:int=0) -> None:
+    def __init__(self, driver_path:str, city:str='', insert:str='', district:str='', list_rooms:list=[], value_price:int=0) -> None:
         super(ParseFlatfly, self).__init__(driver_path)
         self.used_db = WebFlatfy.name
         self.web = WebFlatfy.link_start
         self.link = '/'.join([WebFlatfy.link_start, WebFlatfy.link_continue])
-        self.text = text
+        self.insert = insert
         self.district = district
         self.price_bool = bool(value_price)
         self.price = self.produce_price_value(value_price)
@@ -202,7 +201,7 @@ class ParseFlatfly(ParseMain):
         Input:  None
         Output: None
         """
-        self.find_element_by_id('downshift-0-input').send_keys(self.text)
+        self.find_element_by_id('downshift-0-input').send_keys(self.insert)
         self.execute_click(
             WebDriverWait(self, WebFlatfy.time_wait).until(
                 EC.presence_of_all_elements_located(
@@ -311,7 +310,7 @@ class ParseFlatfly(ParseMain):
             self.produce_search_rooms()
             self.produce_log(Message.message_rooms)
 
-        if self.text:
+        if self.insert:
             self.produce_selected_text()
             self.produce_log(Message.message_insert_text)
         

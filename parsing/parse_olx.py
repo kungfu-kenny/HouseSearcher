@@ -12,7 +12,7 @@ class ParseOlx(ParseMain):
     """
     class which is dedicated to produce_values of the olx website
     """
-    def __init__(self, driver_path:str, insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
+    def __init__(self, driver_path:str, city:str='', insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
         super(ParseOlx, self).__init__(driver_path)
         self.used_db = WebOlx.name
         self.web = WebOlx.link_start
@@ -278,8 +278,8 @@ class ParseOlx(ParseMain):
                     )
                 ], 3
             )
-        places = [f[1] for f in places_all]
-        date = [f[2] for f in places_all]
+        places = [f[1] if len(f) >= 3 else '' for f in places_all]
+        date = [f[2] if len(f) >= 3 else '' for f in places_all]
         
         links = [
             f.get_attribute('href')

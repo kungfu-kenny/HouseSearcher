@@ -12,7 +12,7 @@ class ParseDomria(ParseMain):
     """
     class which is dedicated to parse the domria website and return selected values
     """
-    def __init__(self, driver_path: str, insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
+    def __init__(self, driver_path: str, city:str='', insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
         super(ParseDomria, self).__init__(driver_path)
         self.used_db = WebDomria.name
         self.web = WebDomria.link_start

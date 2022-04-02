@@ -10,15 +10,15 @@ class ParseRieltor(ParseMain):
     """
     class which is dedicated to parse the rieltor website
     """
-    def __init__(self, driver_path: str, insert:str='', district:str='', rooms:list=[], price:int=0, currency:str='uah') -> None:
+    def __init__(self, driver_path: str, city:str='', insert:str='', district:str='', rooms:list=[], price:int=0, currency:str='uah') -> None:
         super(ParseRieltor, self).__init__(driver_path)
         self.used_db = WebRieltor.name
         self.web = WebRieltor.link_start
-        self.text_insert = insert
+        self.insert = insert
         self.text_district = district
         self.list_rooms = [str(i) for i in rooms]
         self.check_district = bool(self.text_district)
-        self.check_text = bool(self.text_insert)
+        self.check_text = bool(self.insert)
         self.currency = currency
         self.currency_bool = self.currency == 'uah'
         self.price_bool = bool(price)
@@ -148,7 +148,7 @@ class ParseRieltor(ParseMain):
         input_text = self.find_element_by_css_selector('input.nav_street_input')
         input_text.click()
         if self.check_text:
-            input_text.send_keys(self.text_insert)
+            input_text.send_keys(self.insert)
         if self.check_district:
             for element, but in zip(
                 self.find_elements_by_css_selector('div.nav_item_option_rayon.js_nav_rayon'), 

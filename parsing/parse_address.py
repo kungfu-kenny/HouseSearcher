@@ -12,9 +12,9 @@ class ParseAddress(ParseMain):
     """
     class which is dedicated to develop the parsing of the adress
     """
-    def __init__(self, driver_path:str, insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
+    def __init__(self, driver_path:str, city:str='', insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
         super(ParseAddress, self).__init__(driver_path)
-        self.city = Address.city_kyiv
+        self.city = Address.city_kyiv if not city else city
         self.price_bool = bool(price)
         self.price, self.price_click = self.produce_price_value(price)
         self.district = district.lower()
@@ -221,11 +221,14 @@ class ParseAddress(ParseMain):
                 self.produce_search_district()
                 self.produce_log(Message.message_district)
         self.produce_search_result_click()
+        self.produce_log(Message.message_click)
         
         if self.price_bool and self.price_click:
                 self.produce_search_price()
+                self.produce_log(Message.message_price)
         elif self.price_bool and not self.price_click:
             self.produce_search_price_manually()
+            self.produce_log(Message.message_price)
 
         value_adress = []
         value_links = []
@@ -236,6 +239,7 @@ class ParseAddress(ParseMain):
         value_squares = []
         value_floors = []
 
+        self.produce_log(Message.message_finish_settings)
         if self.rooms:
             for room in self.rooms:
                 self.produce_search_rooms(room)
@@ -285,9 +289,12 @@ class ParseAddress(ParseMain):
             value_squares, value_floors = self.produce_search_square_floor()
             
             value_use = self.produce_check_further()
+            value_ind = 1
             while value_use:
                 self.get(value_use)
                 time.sleep(Address.time_sleep)
+                value_ind += 1
+                self.produce_log(f'We found the other variations, check the {value_ind} page')
                 value_adress.extend([f.text for f in self.find_elements_by_css_selector('a.link-item')])
                 value_links.extend([f.get_attribute('href') for f in self.find_elements_by_css_selector('a.link-item')])
                 value_dates.extend([f.text for f in self.find_elements_by_css_selector('div.last-edit')])
@@ -299,6 +306,7 @@ class ParseAddress(ParseMain):
                 value_floors.extend(floor_new)
                 value_use = self.produce_check_further()
 
+        self.produce_log(Message.message_done)
         print(
             len(value_adress),
             len(value_links),
@@ -309,3 +317,4 @@ class ParseAddress(ParseMain):
             len(value_squares),
             len(value_floors)
         )
+        self.produce_log(Message.message_done_tr)
