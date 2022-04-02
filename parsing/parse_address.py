@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from parsing.parse_main import ParseMain
+from utilities.work_dataframes import DevelopAddress
 from config import Message, Address
 
 
@@ -14,6 +15,8 @@ class ParseAddress(ParseMain):
     """
     def __init__(self, driver_path:str, city:str='', insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
         super(ParseAddress, self).__init__(driver_path)
+        self.used_db = Address.name
+        self.web = Address.link_start
         self.city = Address.city_kyiv if not city else city
         self.price_bool = bool(price)
         self.price, self.price_click = self.produce_price_value(price)
@@ -204,13 +207,13 @@ class ParseAddress(ParseMain):
             return False
         return value_next
 
-    def produce_search_results(self) -> None:
+    def produce_search_results(self, used_results:set) -> None:
         """
         Method which is dedicated to return the basic results to it
-        Input:  None
+        Input:  used_results = set for the name of dataframes
         Output: we developed the full dataframe for all of it
         """
-        self.get(Address.link_start)
+        self.get(self.web)
         
         self.produce_rent_status()
         self.produce_log(Message.message_status_rent)
@@ -238,6 +241,7 @@ class ParseAddress(ParseMain):
         value_rooms = []
         value_squares = []
         value_floors = []
+        value_prices_square = []
 
         self.produce_log(Message.message_finish_settings)
         if self.rooms:
@@ -253,7 +257,8 @@ class ParseAddress(ParseMain):
                 desc = [f.text for f in self.find_elements_by_css_selector('p.text')]
                 rooms = [room for _ in links]
                 square, floor = self.produce_search_square_floor()
-                
+                square_price = [f.text for f in self.find_elements_by_css_selector('p.square-price')]
+
                 value_use = self.produce_check_further()
                 while value_use:
                     self.get(value_use)
@@ -263,6 +268,7 @@ class ParseAddress(ParseMain):
                     dates.extend([f.text for f in self.find_elements_by_css_selector('div.last-edit')])
                     prices.extend([f.text for f in self.find_elements_by_css_selector('p.full-price.label')])
                     desc.extend([f.text for f in self.find_elements_by_css_selector('p.text')])
+                    square_price.extend([f.text for f in self.find_elements_by_css_selector('p.square-price')])
                     rooms = [room for _ in links]
 
                     square_new, floor_new = self.produce_search_square_floor()
@@ -278,6 +284,7 @@ class ParseAddress(ParseMain):
                 value_rooms.extend(rooms)
                 value_squares.extend(square)
                 value_floors.extend(floor)
+                value_prices_square.extend(square_price)
         else:
             self.produce_search_result_click_send()
             value_adress = [f.text for f in self.find_elements_by_css_selector('a.link-item')]
@@ -287,6 +294,7 @@ class ParseAddress(ParseMain):
             value_desc = [f.text for f in self.find_elements_by_css_selector('p.text')]
             value_rooms = [room for _ in links]
             value_squares, value_floors = self.produce_search_square_floor()
+            value_prices_square = [f.text for f in self.find_elements_by_css_selector('p.square-price')]
             
             value_use = self.produce_check_further()
             value_ind = 1
@@ -300,6 +308,7 @@ class ParseAddress(ParseMain):
                 value_dates.extend([f.text for f in self.find_elements_by_css_selector('div.last-edit')])
                 value_prices.extend([f.text for f in self.find_elements_by_css_selector('p.full-price.label')])
                 value_desc.extend([f.text for f in self.find_elements_by_css_selector('p.text')])
+                value_prices_square.extend([f.text for f in self.find_elements_by_css_selector('p.square-price')])
                 value_rooms = [room for _ in links]
                 square_new, floor_new = self.produce_search_square_floor()
                 value_squares.extend(square_new)
@@ -307,14 +316,17 @@ class ParseAddress(ParseMain):
                 value_use = self.produce_check_further()
 
         self.produce_log(Message.message_done)
-        print(
-            len(value_adress),
-            len(value_links),
-            len(value_dates),
-            len(value_prices),
-            len(value_desc),
-            len(value_rooms),
-            len(value_squares),
-            len(value_floors)
-        )
+        transformated = DevelopAddress(
+            self.used_db,
+            value_adress, 
+            value_links, 
+            value_dates, 
+            value_prices, 
+            value_desc, 
+            value_rooms, 
+            value_squares, 
+            value_floors,
+            value_prices_square
+        ).produce_transform_dataframe(used_results)
         self.produce_log(Message.message_done_tr)
+        return transformated

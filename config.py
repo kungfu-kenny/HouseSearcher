@@ -72,11 +72,31 @@ class DefaultDict:
 
 class Folders:
     file_json = 'default.json'
+    file_default_data = 'data.json'
     folder_main = os.getcwd()
     folder_logs = 'logs'
     folder_json = 'json'
     folder_storage = 'storage'
-    folder_results = 'dataframe'
+    folder_results = 'results'
+
+class Columns:
+    column_link = 'Link'
+    column_date = 'Datetime Updated'
+    column_price = 'Price'
+    column_desc = 'Description'
+    column_rooms = 'Room Number'
+    column_square = 'Square'
+    column_square_price = 'Square Price'
+    column_square_split = 'Square Splited'
+    column_floor = 'Floor'
+    column_address = 'Address'
+    column_subdists = 'Subdistrict'
+    column_types = 'House Project Type'
+    column_types_repair = 'Repairment Type'
+    column_address_name = 'Address Name'
+    column_address_number = 'Address Number'
+    column_address_add = 'Address Additional'
+    column_date_created = 'Created At'
 
 class WebDriver:
     link = os.getenv("WEBDRIVER_LINK")
@@ -112,7 +132,7 @@ class WebDomria:
     rent_status = 'Орендувати квартиру'
 
 class Address:
-    name = 'adress'
+    name = 'address'
     time_wait = 10
     time_sleep = 1
     link_start = 'https://address.ua'

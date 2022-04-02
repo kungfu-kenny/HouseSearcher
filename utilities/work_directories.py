@@ -1,5 +1,15 @@
 import os
+from uuid import uuid4
+from datetime import datetime
 
+
+def develop_name_additional() -> set:
+    """
+    Function where is dedicated to get the name base_values
+    Input:  None
+    Output: set values from the datetime and the random uuid
+    """
+    return datetime.utcnow().strftime("%Y-%m-%d %H:%M"), str(uuid4())
 
 def check_presence_file(value_path:str) -> bool:
     """

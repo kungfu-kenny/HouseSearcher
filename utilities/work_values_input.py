@@ -35,6 +35,7 @@ class StringBasicTransform:
         self.folder_base = os.path.join(Folders.folder_main, Folders.folder_storage)
         self.folder_json = os.path.join(self.folder_base, Folders.folder_json)
         self.file_json = os.path.join(self.folder_json, Folders.file_json)
+        self.file_data = os.path.join(self.folder_json, Folders.file_default_data)
 
     @staticmethod
     def develop_folder(folder:str) -> None:
@@ -98,23 +99,53 @@ class StringBasicTransform:
             return value_list
         return []
 
-    #TODO continue from here
     def develop_default_data(self) -> None:
         """
         Method which is dedicated to get random data from the 
         Input:  None
         Output: we created json for getting them as default
         """
-        pass
+        self.develop_folder(self.folder_base) or self.develop_folder(self.folder_json)
+        if check_presence_file(self.file_data):
+            return
+        with open(self.file_data, 'w') as file_json:
+            json.dump(
+                {
+                    Lang.ukr:{
+                        "city": Default.city_ukr,
+                        "district": "оболонський",
+                        "insert": "мінська",
+                        "price":23000,
+                        "rooms": [2, 3],
+                    },
+                    Lang.rus:{
+                        "city": Default.city_rus,
+                        "district": 'оболонский',
+                        "insert": "минская",
+                        "price":23000,
+                        "rooms": [2, 3],
+                    }
+                },
+                file_json
+            )
 
-    #TODO continue from here
     def get_default_data(self, lang:str=Lang.ukr) -> dict:
         """
         Method which is dedicated to get default data from the json
         Input:  lang = language of the data
         Output: we developed default data for getting them
         """
-        pass
+        self.develop_default_data()
+        with open(self.file_data, 'r') as file_json:
+            value_dict = json.load(file_json)
+        lang = lang if lang in [Lang.ukr, Lang.rus] else Lang.ukr
+        return {
+            "city": value_dict.get(lang, {}).get("city", Default.city_ukr),
+            "rooms": value_dict.get(lang, {}).get('rooms', Default.rooms),
+            "price": value_dict.get(lang, {}).get('price', Default.price),
+            "insert": value_dict.get(lang, {}).get('insert', Default.insert),
+            "district": value_dict.get(lang, {}).get('district', Default.district),
+        }
 
     def main(self) -> set:
         """

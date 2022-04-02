@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utilities.work_lists import make_list_sublists, make_list_transpose
 from parsing.parse_main import ParseMain
+from utilities.work_dataframes import DevelopFlatfy
 from config import WebFlatfy, Message
 
 
@@ -240,7 +241,8 @@ class ParseFlatfly(ParseMain):
         self.wait_loading_elements('div.realty-preview-price.realty-preview-price--main')
         return [
             f.text for f in self.find_elements_by_css_selector(
-                'div.realty-preview-price.realty-preview-price--main')]
+                'div.realty-preview-price.realty-preview-price--main')
+        ]
 
     def produce_searched_prices_sqr(self) -> list:
         """
@@ -251,7 +253,8 @@ class ParseFlatfly(ParseMain):
         self.wait_loading_elements('div.realty-preview-price.realty-preview-price--sqm')
         return [
             f.text for f in self.find_elements_by_css_selector(
-                'div.realty-preview-price.realty-preview-price--sqm')]
+                'div.realty-preview-price.realty-preview-price--sqm')
+        ]
 
     def produce_searched_street_basic(self) -> list:
         """
@@ -261,7 +264,8 @@ class ParseFlatfly(ParseMain):
         """
         self.wait_loading_elements('h3.realty-preview-title')
         return [
-            f.text for f in self.find_elements_by_css_selector('h3.realty-preview-title')]
+            f.text for f in self.find_elements_by_css_selector('h3.realty-preview-title')
+        ]
 
     def wait_loading_elements(self, value_base:str='div.feed-layout__item-holder') -> None:
         """
@@ -292,12 +296,24 @@ class ParseFlatfly(ParseMain):
         """
         self.wait_loading_elements('p.realty-preview-description__text')
         return [
-            f.text for f in self.find_elements_by_css_selector('p.realty-preview-description__text')]
+            f.text for f in self.find_elements_by_css_selector('p.realty-preview-description__text')
+        ]
         
-    def produce_search_results(self):
+    def produce_searched_date(self) -> list:
+        """
+        Method which is dedicated to search the date values
+        Input:  None
+        Output: list of the dates
+        """
+        self.wait_loading_elements('div.realty-preview-dates')
+        return [
+            f.text for f in self.find_elements_by_css_selector('div.realty-preview-dates')
+        ]
+
+    def produce_search_results(self, used_results:set):
         """
         Method which is dedicated for the testing of the selected values
-        Input:  None
+        Input:  used_results = set of the datetime and uuid
         Output: we developed values
         """
         self.get(self.link)
@@ -322,6 +338,7 @@ class ParseFlatfly(ParseMain):
         value_prices_sqr = self.produce_searched_prices_sqr()
         value_streets_basic = self.produce_searched_street_basic()
         value_descriptions = self.produce_searched_description()
+        value_dates = self.produce_searched_date()
         
         self.wait_loading_elements('div.realty-preview-sub-title-wrapper')
         value_full_adresses, value_subdists, value_districts, value_cities = \
@@ -362,6 +379,7 @@ class ParseFlatfly(ParseMain):
             value_prices_sqr.extend(self.produce_searched_prices_sqr())
             value_streets_basic.extend(self.produce_searched_street_basic())
             value_descriptions.extend(self.produce_searched_description())
+            value_dates.extend(self.produce_searched_date())
 
             self.wait_loading_elements('div.realty-preview-sub-title-wrapper')
             value_full_adress, value_subdist, value_district, value_city = \
@@ -393,20 +411,23 @@ class ParseFlatfly(ParseMain):
             value_years.extend(value_year)
 
         self.produce_log(Message.message_done)
-        print('Links', len(value_links))
-        print('Prices', len(value_prices))
-        print('Prices Sqr', len(value_prices_sqr))
-        print('Streets Base', len(value_streets_basic))
-        print('Descriptions', len(value_descriptions))
-        print('Full addr', len(value_full_adresses))
-        print('Sub dists', len(value_subdists))
-        print('Cities', len(value_cities))
-        print('Rooms', len(value_rooms))
-        print('Square', len(value_squares))
-        print('Floors', len(value_floors))
-        print('Types', len(value_types))
-        print('Repairs', len(value_repairs))
-        print('Years', len(value_years))
-        print('########################################################################')
-        self.produce_log(Message.message_done_tr)
         
+        transformated = DevelopFlatfy(
+            self.used_db,
+            value_streets_basic, 
+            value_links, 
+            value_dates, 
+            value_prices, 
+            value_descriptions, 
+            value_rooms, 
+            value_squares, 
+            value_floors,
+            value_full_adresses,
+            value_prices_sqr,
+            value_subdists,
+            value_years,
+            value_types, 
+            value_repairs
+        ).produce_transform_dataframe(used_results)
+        self.produce_log(Message.message_done_tr)
+        return transformated

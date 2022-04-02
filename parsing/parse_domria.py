@@ -126,7 +126,7 @@ class ParseDomria(ParseMain):
             )
         )
         # self.execute_script("window.stop();")
-
+        
         after = WebDriverWait(self, WebDomria.time_wait).until(
             EC.presence_of_element_located(
                 (
@@ -349,10 +349,10 @@ class ParseDomria(ParseMain):
             else: value_return.append('')
         return value_return
 
-    def produce_search_results(self) -> None:
+    def produce_search_results(self, used_results:set) -> None:
         """
         Method which is dedicated to work with the search
-        Input:  None
+        Input:  used_results = set of the datetime and the uuid
         Output: we developed the dataframe of selected values
         """
         self.get(WebDomria.link_start)

@@ -206,9 +206,11 @@ class ParseRieltor(ParseMain):
                 value_return.append('')
         return value_return
 
-    def produce_search_results(self) -> list:
+    def produce_search_results(self, used_results:set) -> list:
         """
         Method which is dedicated to return values of the results by the flats
+        Input:  used_results = datetime and uuid for the results
+        Output: we developed the value of the results
         """
         self.get(WebRieltor.link_continue)
         
@@ -240,6 +242,11 @@ class ParseRieltor(ParseMain):
         self.wait_loading_elements()
         print(Message.message_finish_settings)
         
+
+        import time
+        time.sleep(5)
+        return
+
         streets = [f.text for f in self.wait_loading_elements('div.catalog-item__title_street')]
         
         links = [
