@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utilities.work_lists import make_list_sublists, make_list_transpose
 from parsing.parse_main import ParseMain
-from utilities.work_dataframes import DevelopFlatfy
+from utilities.work_dataframes_flatfy import DevelopFlatfy
 from config import WebFlatfy, Message
 
 

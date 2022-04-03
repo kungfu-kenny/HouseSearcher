@@ -68,7 +68,8 @@ class StringBasicTransform:
                         'district': DefaultDict.value_district_ukr_rus
                     }, 
                 },
-                file_json
+                file_json,
+                indent=4
             )
 
     @staticmethod
@@ -126,7 +127,8 @@ class StringBasicTransform:
                         "rooms": [2, 3],
                     }
                 },
-                file_json
+                file_json,
+                indent=4
             )
 
     def get_default_data(self, lang:str=Lang.ukr) -> dict:

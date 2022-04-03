@@ -36,10 +36,11 @@ try:
     
     #TODO refactor all of these data parsers
     # parse_olx = ParseOlx(path_webdriver, city_ukr, insert, district_rus, rooms, price).produce_search_results()
-    # parse_domria = ParseDomria(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
     # parse_rieltor = ParseRieltor(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
-    parse_flatfy = ParseFlatfly(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
-    parse_adress = ParseAddress(path_webdriver, city_rus, '', district_rus, rooms, price).produce_search_results(used_results)
+    
+    parse_domria = ParseDomria(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
+    # parse_flatfy = ParseFlatfly(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
+    # parse_address = ParseAddress(path_webdriver, city_rus, '', district_rus, rooms, price).produce_search_results(used_results)
 
 except Exception as e:
     print(e)

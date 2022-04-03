@@ -1,10 +1,10 @@
-import time
 from pprint import pprint
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from parsing.parse_main import ParseMain
+from utilities.work_dataframes_domria import DevelopDomria
 from config import WebDomria, Message
 
 
@@ -14,6 +14,7 @@ class ParseDomria(ParseMain):
     """
     def __init__(self, driver_path: str, city:str='', insert:str='', district:str='', rooms:list=[], price:int=0) -> None:
         super(ParseDomria, self).__init__(driver_path)
+        self.city = city.capitalize()
         self.used_db = WebDomria.name
         self.web = WebDomria.link_start
         self.link = WebDomria.link_continue
@@ -72,7 +73,6 @@ class ParseDomria(ParseMain):
         Output: we added the basic filtration for it
         """
         self.find_element_by_id('autocomplete-1').send_keys(self.text)
-        
         if not self.produce_selected_text_check():
             for _ in self.text:
                 self.find_element_by_id('autocomplete-1').send_keys(Keys.BACK_SPACE)
@@ -104,28 +104,14 @@ class ParseDomria(ParseMain):
             )
         )
         
-        self.execute_script(
-            "arguments[0].click();", 
-            WebDriverWait(
-                WebDriverWait(self, WebDomria.time_wait).until(
-                    EC.presence_of_element_located(
-                        (
-                            By.CSS_SELECTOR, 
-                            'div#mainAdditionalParams_0'
-                        )
-                    )
-                ), 
-                WebDomria.time_wait
-            ).until(
-                EC.element_to_be_clickable(
-                    (
-                        By.CSS_SELECTOR, 
-                        'div.first-letter.overflowed.greyChars'
-                    )
+        WebDriverWait(self, WebDomria.time_wait).until(
+            EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR, 
+                    'div#mainAdditionalParams_0'
                 )
             )
-        )
-        # self.execute_script("window.stop();")
+        ).click()
         
         after = WebDriverWait(self, WebDomria.time_wait).until(
             EC.presence_of_element_located(
@@ -164,7 +150,6 @@ class ParseDomria(ParseMain):
         Input:  values of the inserted city
         Output: we developed the city search for the flat
         """
-        #TODO add after here checking & check here
         WebDriverWait(self, WebDomria.time_wait).until(
             EC.presence_of_element_located(
                 (
@@ -174,9 +159,8 @@ class ParseDomria(ParseMain):
             )
         )
         k = self.find_element_by_id('autocomplete')
-        #TODO add here the selected values
         k.click()
-        k.send_keys('Київ')
+        k.send_keys(self.city)
         k.send_keys(Keys.ENTER)
 
     def produce_search_district(self) -> None:
@@ -204,30 +188,16 @@ class ParseDomria(ParseMain):
                 )
             )
         )
-        
-        WebDriverWait(
-            WebDriverWait(self, WebDomria.time_wait).until(
+
+        WebDriverWait(self, WebDomria.time_wait).until(
             EC.presence_of_element_located(
                 (
                     By.CSS_SELECTOR, 
                     'div#mainAdditionalParams_1'
                 )
             )
-        ), WebDomria.time_wait).until(
-            EC.element_to_be_clickable(
-                (
-                    By.CSS_SELECTOR, 
-                    'div.first-letter.overflowed.greyChars'
-                )
-            )
-        )
-        self.find_element_by_css_selector(
-                'div#mainAdditionalParams_1'
-            ).find_element(
-                By.CSS_SELECTOR,
-                'div.first-letter.overflowed.greyChars'
-            ).click()
-        
+        ).click()
+
         for element in self.find_elements_by_css_selector('label.tabs-item'):
             if element.text:
                 if element.text in self.list_rooms:
@@ -319,7 +289,7 @@ class ParseDomria(ParseMain):
         Input:  None
         Output: boolean value which checks presence of next values
         """
-        if len(self.find_elements_by_css_selector('span.page-item.next.text-r')) > 0:
+        if len(self.find_elements_by_css_selector('a.button-border.page-item.next.text-r')) > 0:
             return True
         return False
 
@@ -387,14 +357,16 @@ class ParseDomria(ParseMain):
                 self.produce_selected_text()
                 self.produce_log(Message.message_insert_text)
         
-        if self.price_bool:
-            self.produce_search_price()
-            self.produce_log(Message.message_price)
-        
-        if self.list_rooms:
-            self.produce_search_rooms()
-            self.produce_log(Message.message_rooms)
-
+        try:
+            if self.price_bool:
+                self.produce_search_price()
+                self.produce_log(Message.message_price)
+            
+            if self.list_rooms:
+                self.produce_search_rooms()
+                self.produce_log(Message.message_rooms)
+        except Exception:
+            self.produce_log(Message.message_mistake)
         
         self.produce_log(Message.message_finish_settings)
         self.wait_loading_elements()
@@ -405,6 +377,7 @@ class ParseDomria(ParseMain):
         value_address_full = [f.get_attribute('title') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
         value_description = [f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')]
         value_date = [f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')]
+        value_further = [f.text for f in self.wait_loading_elements('div.mt-10.chars.grey')]
         
         value_ind = 1
         while self.produce_check_presence_links():
@@ -419,9 +392,21 @@ class ParseDomria(ParseMain):
             value_links.extend([f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')])
             value_description.extend([f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')])
             value_date.extend([f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')])
+            value_further.extend([f.text for f in self.wait_loading_elements('div.mt-10.chars.grey')])
 
         self.produce_log(Message.message_done)
-        print('..................................................................................................')
-        print(len(value_price), len(value_links), len(value_address), len(value_date), len(value_address_full), len(value_description))
+        transformated = DevelopDomria(
+            self.used_db,
+            value_address,
+            value_links,
+            value_date,
+            value_price,
+            value_description,
+            value_further,
+            value_address_full,
+            self.price,
+            self.list_rooms
+        ).produce_transform_dataframe(used_results)
         self.produce_log(Message.message_done_tr)
         
+        return transformated

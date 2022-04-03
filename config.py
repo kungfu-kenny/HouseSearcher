@@ -134,10 +134,10 @@ class WebDomria:
 class Address:
     name = 'address'
     time_wait = 10
-    time_sleep = 1
+    time_sleep = 0.5
     link_start = 'https://address.ua'
     rent_status = 'Снять'
-    city_kyiv = 'киев'
+    city_kyiv = Default.city_rus
 
 class Message:
     message_click = 'Clicked to search results'
@@ -154,3 +154,4 @@ class Message:
     message_markup_success = 'Added check of the right markup and everything is okay'
     message_markup_fail = 'Added check of the right markup and we need change it'
     message_markup_change = 'Added the type of the markup'
+    message_mistake = 'We faced mistake with this unstable elements'
