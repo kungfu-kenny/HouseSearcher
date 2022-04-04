@@ -1,7 +1,6 @@
 import os
 from pprint import pprint
 import pandas as pd
-# from datetime import datetime, timedelta
 from utilities.work_directories import (
     create_directory, 
     check_presence_file, 
@@ -82,7 +81,10 @@ class DevelopResults:
         """
         for replacement in replacements:
             value = value.replace(replacement, '')
-        return int(value.strip())
+        try:
+            return int(value.strip())
+        except Exception:
+            return -1
 
     @staticmethod
     def check_folder(folder:str) -> None:
@@ -109,7 +111,7 @@ class DevelopResults:
         Input:  df = pandas DataFrame to save
         Output: we created dataframe if it is necessary
         """
-        df.to_csv(df_path)
+        df.to_csv(df_path, index=False)
     
     @staticmethod
     def create_dataframe_name(path:str, name:str, used:set) -> str:
@@ -129,7 +131,7 @@ class DevelopResults:
         Input:  dataframes = list of the selected dataframes
         Output: we merged dataframes into one
         """
-        pass
+        return pd.concat(dataframes)
 
     def produce_result(self, dataframes:list, used_results:set) -> pd.DataFrame:
         """
@@ -138,6 +140,7 @@ class DevelopResults:
                 used_results = set of the getting unique data
         Output: we created fully merged dataframe value
         """
+        self.check_values_presence_folder()
         dataframe_merge = self.produce_merge_dataframe(dataframes)
         dataframe_name = self.create_dataframe_name(self.folder_results, 'result', used_results)
         if not check_presence_file(dataframe_name):

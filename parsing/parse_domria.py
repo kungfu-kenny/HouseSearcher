@@ -371,13 +371,14 @@ class ParseDomria(ParseMain):
         self.produce_log(Message.message_finish_settings)
         self.wait_loading_elements()
         
-        value_links = [f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
+        self.wait_loading_elements('b.size18')
         value_price = [f.text for f in self.wait_loading_elements('b.size18')]
         value_address = [f.text for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
         value_address_full = [f.get_attribute('title') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
         value_description = [f.text for f in self.wait_loading_elements('div.mt-15.text.pointer.desc-hidden')]
         value_date = [f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')]
         value_further = [f.text for f in self.wait_loading_elements('div.mt-10.chars.grey')]
+        value_links = [f.get_attribute('href') for f in self.wait_loading_elements('a.realty-link.size22.bold.mb-10.break.b')]
         
         value_ind = 1
         while self.produce_check_presence_links():
@@ -394,6 +395,16 @@ class ParseDomria(ParseMain):
             value_date.extend([f.get_attribute('datetime') for f in self.wait_loading_elements('time.size14.flex.mt-10')])
             value_further.extend([f.text for f in self.wait_loading_elements('div.mt-10.chars.grey')])
 
+        # print(
+        #     len(value_address),
+        #     len(value_links), 
+        #     len(value_date),
+        #     len(value_address_full),
+        #     len(value_description),
+        #     len(value_date),
+        #     len(value_further),
+        #     len(value_price)
+        # )
         self.produce_log(Message.message_done)
         transformated = DevelopDomria(
             self.used_db,

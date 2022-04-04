@@ -7,6 +7,7 @@ from parsing.parse_rieltor import ParseRieltor
 from parsing.parse_address import ParseAddress
 from utilities.work_values_input import StringBasicTransform
 from utilities.work_directories import develop_name_additional
+from utilities.work_dataframes import DevelopResults
 
 
 #TODO add here the parallelization to the end
@@ -34,13 +35,22 @@ try:
     ).main()
     used_results = develop_name_additional()
     
-    #TODO refactor all of these data parsers
-    # parse_olx = ParseOlx(path_webdriver, city_ukr, insert, district_rus, rooms, price).produce_search_results()
-    # parse_rieltor = ParseRieltor(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
-    
+    parse_olx = ParseOlx(path_webdriver, city_ukr, insert, district_rus, rooms, price).produce_search_results(used_results)
     parse_domria = ParseDomria(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
-    # parse_flatfy = ParseFlatfly(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
-    # parse_address = ParseAddress(path_webdriver, city_rus, '', district_rus, rooms, price).produce_search_results(used_results)
+    parse_rieltor = ParseRieltor(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
+    parse_flatfy = ParseFlatfly(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
+    parse_address = ParseAddress(path_webdriver, city_rus, '', district_rus, rooms, price).produce_search_results(used_results)
+    
+    DevelopResults().produce_result(
+        [
+            parse_olx, 
+            parse_rieltor, 
+            parse_flatfy, 
+            parse_address,
+            parse_domria
+        ], 
+        used_results
+    )
 
 except Exception as e:
     print(e)

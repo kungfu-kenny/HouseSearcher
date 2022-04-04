@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utilities.work_lists import make_list_sublists
 from parsing.parse_main import ParseMain
+from utilities.work_dataframes_olx import DevelopOlx
 from config import WebOlx, Message
 
 
@@ -219,10 +220,10 @@ class ParseOlx(ParseMain):
         except Exception:
             return False
 
-    def produce_search_results(self) -> set:
+    def produce_search_results(self, used_results:set) -> set:
         """
         Method which is dedicated to get values
-        Input:  previously developed link
+        Input:  used_results = set of the uuid and data when to searched
         Output: we developed list with selected values
         """
         self.get(self.link)
@@ -230,42 +231,25 @@ class ParseOlx(ParseMain):
         if self.list_rooms:
             self.produce_search_rooms()
             self.produce_log(Message.message_rooms)
-
+        
         if self.price_bool:
             self.produce_search_price()
             self.produce_log(Message.message_price)
-            
+        
         if self.text_district:
             self.produce_search_district()
             self.produce_log(Message.message_district)
-
+        
         self.produce_search_result_click()
         self.produce_log(Message.message_click)
-
+        
         self.wait_loading_elements()
         
         self.produce_log(Message.message_finish_settings)
         
-        prices = [f.text for f in WebDriverWait(self, WebOlx.time_wait
-            ).until(
-                EC.presence_of_all_elements_located(
-                    (
-                        By.CSS_SELECTOR,
-                        'p.price'
-                    )
-                )
-            )]
-        
-        names = [f.text for f in WebDriverWait(self, WebOlx.time_wait
-            ).until(
-                EC.presence_of_all_elements_located(
-                    (
-                        By.CSS_SELECTOR,
-                        'h3.lheight22.margintop5'
-                    )
-                )
-            )]
-        
+        names = [f.text for f in self.find_elements_by_css_selector('h3.lheight22.margintop5')]
+        prices = [f.text for f in self.find_elements_by_css_selector('td.wwnormal.tright.td-price')]
+
         places_all = make_list_sublists(
                 [f.text for f in WebDriverWait(self, WebOlx.time_wait
                     ).until(
@@ -278,6 +262,7 @@ class ParseOlx(ParseMain):
                     )
                 ], 3
             )
+
         places = [f[1] if len(f) >= 3 else '' for f in places_all]
         date = [f[2] if len(f) >= 3 else '' for f in places_all]
         
@@ -293,7 +278,7 @@ class ParseOlx(ParseMain):
                 )
             )
         ]
-        
+
         value_ind = 2
         value_link = self.check_element_clickable()
         while value_link:
@@ -303,29 +288,11 @@ class ParseOlx(ParseMain):
 
             self.wait_loading_elements()
             
-            prices.extend(
-                [f.text for f in WebDriverWait(self, WebOlx.time_wait
-                    ).until(
-                        EC.presence_of_all_elements_located(
-                            (
-                                By.CSS_SELECTOR,
-                                'p.price'
-                            )
-                        )
-                    )
-                ]
-            )
             names.extend(
-                [f.text for f in WebDriverWait(self, WebOlx.time_wait
-                    ).until(
-                        EC.presence_of_all_elements_located(
-                            (
-                                By.CSS_SELECTOR,
-                                'h3.lheight22.margintop5'
-                            )
-                        )
-                    )
-                ]
+                [f.text for f in self.find_elements_by_css_selector('h3.lheight22.margintop5')]
+            )
+            prices.extend(
+                [f.text for f in self.find_elements_by_css_selector('td.wwnormal.tright.td-price')]
             )
             places_all = make_list_sublists(
                 [f.text for f in WebDriverWait(self, WebOlx.time_wait
@@ -355,7 +322,20 @@ class ParseOlx(ParseMain):
             )
             value_link = self.check_element_clickable()
         self.produce_log(Message.message_done)
-        
-        #TODO add here the first version of transformation
-        print(len(names), len(places), len(prices), len(links), len(date))
+        # print(
+        #     len(names),
+        #     len(links), 
+        #     len(date),
+        #     len(places),
+        #     len(prices)
+        # )
+        transform = DevelopOlx(
+            self.used_db, 
+            names, 
+            links, 
+            date, 
+            prices, 
+            places
+        ).produce_transform_dataframe(used_results)
         self.produce_log(Message.message_done_tr)
+        return transform

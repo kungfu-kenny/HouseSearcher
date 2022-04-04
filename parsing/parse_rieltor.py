@@ -1,8 +1,10 @@
 from pprint import pprint
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from parsing.parse_main import ParseMain
+from utilities.work_dataframes_rieltor import DevelopRieltor
 from config import WebRieltor, Message
 
 
@@ -22,7 +24,7 @@ class ParseRieltor(ParseMain):
         self.currency = currency
         self.currency_bool = self.currency == 'uah'
         self.price_bool = bool(price)
-        self.price = self.produce_price_value(price, self.currency)
+        self.price = price#self.produce_price_value(price, self.currency)
 
     @staticmethod
     def produce_price_value(price:int, currency:str='uah') -> str:
@@ -109,36 +111,8 @@ class ParseRieltor(ParseMain):
         Input:  None
         Output: we developed the price values which could be used
         """
-        value_cube = self.find_element_by_css_selector('div.nav_items_wr.nav_items_wr_middle')
-            # WebDriverWait(self, WebRieltor.time_wait).until(
-            #     EC.presence_of_element_located(
-            #         (
-            #             By.CSS_SELECTOR, 
-            #             'div.nav_items_wr.nav_items_wr_middle'
-            #         )
-            #     )
-            # )
-        print(value_cube)
-        self.execute_script(
-            "arguments[0].click();",
-            value_cube.find_element('div.nav_item_active_wr.js_open_nav')
-        )
-        print('dfsaaaaaadffdfdfdfdf')
-        # for element in value_cube.find_elements(By.CSS_SELECTOR, 'div.nav_item_option.js_nav_option'):
-        # WebDriverWait(
-        #         value_cube, WebRieltor.time_wait).until(
-        #         EC.presence_of_all_elements_located(
-        #             (
-        #                 By.CSS_SELECTOR, 
-        #                 'div.nav_item_option.js_nav_option'
-        #                 )
-        #             )
-        #         ):
-            # if element.text == self.price:
-            #     print(element.text)
-            #     element.click()
-            #     print('dsadsadasdadas')
-            
+        pass
+
     def produce_search_district(self) -> None:
         """
         Method which is dedicated to produce the selected district
@@ -147,13 +121,14 @@ class ParseRieltor(ParseMain):
         """
         input_text = self.find_element_by_css_selector('input.nav_street_input')
         input_text.click()
+
         if self.check_text:
             input_text.send_keys(self.insert)
         if self.check_district:
             for element, but in zip(
                 self.find_elements_by_css_selector('div.nav_item_option_rayon.js_nav_rayon'), 
                 self.find_elements_by_css_selector('div.nav_item_rayon_checkbox')):
-                if element.text == self.text_district:
+                if element.text.lower() == self.text_district:
                     but.click()
                     break
 
@@ -240,13 +215,8 @@ class ParseRieltor(ParseMain):
         self.produce_log(Message.message_click)
         
         self.wait_loading_elements()
-        print(Message.message_finish_settings)
+        self.produce_log(Message.message_finish_settings)
         
-
-        import time
-        time.sleep(5)
-        return
-
         streets = [f.text for f in self.wait_loading_elements('div.catalog-item__title_street')]
         
         links = [
@@ -328,17 +298,21 @@ class ParseRieltor(ParseMain):
             value_now = self.develop_values_further(value_ind)
 
         self.produce_log(Message.message_done)
-        print(
-                len(streets), 
-                len(links), 
-                len(districts), 
-                len(prices), 
-                len(subways), 
-                len(types), 
-                len(commission), 
-                len(values), 
-                len(descriptions)
-            )
-        print('===============================================================================')
+        transform = DevelopRieltor(
+            self.used_db, 
+            streets, 
+            links, 
+            prices, 
+            descriptions, 
+            self.list_rooms, 
+            values,
+            subways,
+            commission,
+            types,
+            districts,
+            self.price,
+            self.text_district
+        ).produce_transform_dataframe(used_results)
         self.produce_log(Message.message_done_tr)
+        return transform
             
