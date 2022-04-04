@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from parsing.parse_main import ParseMain
 from utilities.work_dataframes_domria import DevelopDomria
+from utilities.work_lists import make_check_list_length
 from config import WebDomria, Message
 
 
@@ -406,18 +407,40 @@ class ParseDomria(ParseMain):
         #     len(value_price)
         # )
         self.produce_log(Message.message_done)
-        transformated = DevelopDomria(
-            self.used_db,
+        if make_check_list_length(
             value_address,
             value_links,
             value_date,
             value_price,
             value_description,
             value_further,
-            value_address_full,
-            self.price,
-            self.list_rooms
-        ).produce_transform_dataframe(used_results)
+            value_address_full
+        ):
+            transformated = DevelopDomria(
+                self.used_db,
+                value_address,
+                value_links,
+                value_date,
+                value_price,
+                value_description,
+                value_further,
+                value_address_full,
+                self.price,
+                self.list_rooms
+            ).produce_transform_dataframe(used_results)
+        else:
+            transformated = DevelopDomria(
+                self.used_db,
+                value_address,
+                value_links,
+                value_date,
+                value_price,
+                value_description,
+                value_further,
+                value_address_full,
+                self.price,
+                self.list_rooms
+            ).produce_empty()
+            self.produce_log(Message.message_empty)
         self.produce_log(Message.message_done_tr)
-        
         return transformated

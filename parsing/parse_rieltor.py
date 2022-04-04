@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from parsing.parse_main import ParseMain
 from utilities.work_dataframes_rieltor import DevelopRieltor
+from utilities.work_lists import make_check_list_length
 from config import WebRieltor, Message
 
 
@@ -298,8 +299,7 @@ class ParseRieltor(ParseMain):
             value_now = self.develop_values_further(value_ind)
 
         self.produce_log(Message.message_done)
-        transform = DevelopRieltor(
-            self.used_db, 
+        if make_check_list_length(
             streets, 
             links, 
             prices, 
@@ -309,10 +309,40 @@ class ParseRieltor(ParseMain):
             subways,
             commission,
             types,
-            districts,
-            self.price,
-            self.text_district
-        ).produce_transform_dataframe(used_results)
+            districts
+        ):
+            transformated = DevelopRieltor(
+                self.used_db, 
+                streets, 
+                links, 
+                prices, 
+                descriptions, 
+                self.list_rooms, 
+                values,
+                subways,
+                commission,
+                types,
+                districts,
+                self.price,
+                self.text_district
+            ).produce_transform_dataframe(used_results)
+        else:
+            transformated = DevelopRieltor(
+                self.used_db, 
+                streets, 
+                links, 
+                prices, 
+                descriptions, 
+                self.list_rooms, 
+                values,
+                subways,
+                commission,
+                types,
+                districts,
+                self.price,
+                self.text_district
+            ).produce_empty()
+            self.produce_log(Message.message_empty)
         self.produce_log(Message.message_done_tr)
-        return transform
+        return transformated
             

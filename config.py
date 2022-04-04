@@ -159,3 +159,4 @@ class Message:
     message_markup_fail = 'Added check of the right markup and we need change it'
     message_markup_change = 'Added the type of the markup'
     message_mistake = 'We faced mistake with this unstable elements'
+    message_empty = 'Unfortunately we have problems with the df size so we return empty'

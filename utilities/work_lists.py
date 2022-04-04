@@ -1,4 +1,13 @@
 
+
+def make_check_list_length(*lists) -> bool:
+    """
+    Function which is dedicated to make check length values
+    Input:  *lists = args of developed list
+    Output: boolean value which is signify to create values
+    """
+    return len(list(set([len(f) for f in lists]))) == 1
+
 def make_list_sublists(value_list:list, value_len:int) -> list:
     """
     Function which is dedicated to make sublists of the existing list

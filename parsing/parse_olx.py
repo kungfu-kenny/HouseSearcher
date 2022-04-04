@@ -3,9 +3,12 @@ from pprint import pprint
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from utilities.work_lists import make_list_sublists
 from parsing.parse_main import ParseMain
 from utilities.work_dataframes_olx import DevelopOlx
+from utilities.work_lists import (
+    make_list_sublists, 
+    make_check_list_length
+)
 from config import WebOlx, Message
 
 
@@ -329,13 +332,30 @@ class ParseOlx(ParseMain):
         #     len(places),
         #     len(prices)
         # )
-        transform = DevelopOlx(
-            self.used_db, 
+
+        if make_check_list_length(
             names, 
             links, 
             date, 
             prices, 
             places
-        ).produce_transform_dataframe(used_results)
+        ):
+            transformated = DevelopOlx(
+                self.used_db, 
+                names, 
+                links, 
+                date, 
+                prices, 
+                places
+            ).produce_transform_dataframe(used_results)
+        else:
+            transformated = DevelopOlx(self.used_db, 
+                names, 
+                links, 
+                date, 
+                prices, 
+                places
+            ).produce_empty()
+            self.produce_log(Message.message_empty)
         self.produce_log(Message.message_done_tr)
-        return transform
+        return transformated

@@ -3,6 +3,7 @@ from pprint import pprint
 from selenium.webdriver.common.keys import Keys
 from parsing.parse_main import ParseMain
 from utilities.work_dataframes_address import DevelopAddress
+from utilities.work_lists import make_check_list_length
 from config import Message, Address
 
 
@@ -313,8 +314,7 @@ class ParseAddress(ParseMain):
                 value_use = self.produce_check_further()
 
         self.produce_log(Message.message_done)
-        transformated = DevelopAddress(
-            self.used_db,
+        if make_check_list_length(
             value_adress, 
             value_links, 
             value_dates, 
@@ -324,6 +324,32 @@ class ParseAddress(ParseMain):
             value_squares, 
             value_floors,
             value_prices_square
-        ).produce_transform_dataframe(used_results)
+        ):
+            transformated = DevelopAddress(
+                self.used_db,
+                value_adress, 
+                value_links, 
+                value_dates, 
+                value_prices, 
+                value_desc, 
+                value_rooms, 
+                value_squares, 
+                value_floors,
+                value_prices_square
+            ).produce_transform_dataframe(used_results)
+        else:
+            transformated = DevelopAddress(
+                self.used_db,
+                value_adress, 
+                value_links, 
+                value_dates, 
+                value_prices, 
+                value_desc, 
+                value_rooms, 
+                value_squares, 
+                value_floors,
+                value_prices_square
+            ).produce_empty()
+            self.produce_log(Message.message_empty)
         self.produce_log(Message.message_done_tr)
         return transformated

@@ -2,7 +2,11 @@ from pprint import pprint
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from utilities.work_lists import make_list_sublists, make_list_transpose
+from utilities.work_lists import (
+    make_list_sublists, 
+    make_list_transpose,
+    make_check_list_length
+)
 from parsing.parse_main import ParseMain
 from utilities.work_dataframes_flatfy import DevelopFlatfy
 from config import WebFlatfy, Message
@@ -411,9 +415,7 @@ class ParseFlatfly(ParseMain):
             value_years.extend(value_year)
 
         self.produce_log(Message.message_done)
-        
-        transformated = DevelopFlatfy(
-            self.used_db,
+        if make_check_list_length(
             value_streets_basic, 
             value_links, 
             value_dates, 
@@ -428,6 +430,42 @@ class ParseFlatfly(ParseMain):
             value_years,
             value_types, 
             value_repairs
-        ).produce_transform_dataframe(used_results)
+        ):
+            transformated = DevelopFlatfy(
+                self.used_db,
+                value_streets_basic, 
+                value_links, 
+                value_dates, 
+                value_prices, 
+                value_descriptions, 
+                value_rooms, 
+                value_squares, 
+                value_floors,
+                value_full_adresses,
+                value_prices_sqr,
+                value_subdists,
+                value_years,
+                value_types, 
+                value_repairs
+            ).produce_transform_dataframe(used_results)
+        else:
+            transformated = DevelopFlatfy(
+                self.used_db,
+                value_streets_basic, 
+                value_links, 
+                value_dates, 
+                value_prices, 
+                value_descriptions, 
+                value_rooms, 
+                value_squares, 
+                value_floors,
+                value_full_adresses,
+                value_prices_sqr,
+                value_subdists,
+                value_years,
+                value_types, 
+                value_repairs
+            ).produce_empty()
+            self.produce_log(Message.message_empty)
         self.produce_log(Message.message_done_tr)
         return transformated

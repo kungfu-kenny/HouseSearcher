@@ -111,6 +111,8 @@ class DevelopResults:
         Input:  df = pandas DataFrame to save
         Output: we created dataframe if it is necessary
         """
+        if df.empty:
+            return
         df.to_csv(df_path, index=False)
     
     @staticmethod
@@ -132,6 +134,15 @@ class DevelopResults:
         Output: we merged dataframes into one
         """
         return pd.concat(dataframes)
+
+    @staticmethod
+    def produce_empty() -> pd.DataFrame:
+        """
+        Static method which returns empty dataframe values
+        Input:  None
+        Output: pd.DataFrame values
+        """
+        return pd.DataFrame({})
 
     def produce_result(self, dataframes:list, used_results:set) -> pd.DataFrame:
         """

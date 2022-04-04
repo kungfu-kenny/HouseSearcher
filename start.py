@@ -10,7 +10,6 @@ from utilities.work_directories import develop_name_additional
 from utilities.work_dataframes import DevelopResults
 
 
-#TODO add here the parallelization to the end
 try:
     parse_web = ParseWebDriver()
     path_webdriver = parse_web.check_webdriver_main()
@@ -35,19 +34,52 @@ try:
     ).main()
     used_results = develop_name_additional()
     
-    parse_olx = ParseOlx(path_webdriver, city_ukr, insert, district_rus, rooms, price).produce_search_results(used_results)
-    parse_domria = ParseDomria(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
-    parse_rieltor = ParseRieltor(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
-    parse_flatfy = ParseFlatfly(path_webdriver, city_ukr, insert, district_ukr, rooms, price).produce_search_results(used_results)
-    parse_address = ParseAddress(path_webdriver, city_rus, '', district_rus, rooms, price).produce_search_results(used_results)
-    
     DevelopResults().produce_result(
         [
-            parse_olx, 
-            parse_rieltor, 
-            parse_flatfy, 
-            parse_address,
-            parse_domria
+            ParseOlx(
+                path_webdriver, 
+                city_ukr, 
+                insert, 
+                district_rus, 
+                rooms, 
+                price
+            ).produce_search_results(used_results),
+
+            ParseDomria(
+                path_webdriver, 
+                city_ukr, 
+                insert, 
+                district_ukr, 
+                rooms, 
+                price
+            ).produce_search_results(used_results),
+
+            ParseRieltor(
+                path_webdriver, 
+                city_ukr, 
+                insert, 
+                district_ukr, 
+                rooms, 
+                price
+            ).produce_search_results(used_results),
+
+            ParseFlatfly(
+                path_webdriver, 
+                city_ukr, 
+                insert, 
+                district_ukr, 
+                rooms, 
+                price
+            ).produce_search_results(used_results),
+
+            ParseAddress(
+                path_webdriver, 
+                city_rus, 
+                '', 
+                district_rus, 
+                rooms, 
+                price
+            ).produce_search_results(used_results)
         ], 
         used_results
     )
